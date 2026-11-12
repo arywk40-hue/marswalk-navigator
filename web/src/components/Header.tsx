@@ -13,9 +13,16 @@ export const Header: React.FC = () => {
     setActiveTab,
     tourStep,
     setTourStep,
+    timeOfSol,
   } = useAppStore();
 
   const isHud = displayMode === 'hud';
+
+  const formatLST = (decHour: number) => {
+    const h = Math.floor(decHour);
+    const m = Math.round((decHour - h) * 60);
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} LST`;
+  };
 
   const handleStartTour = () => {
     setDisplayMode('planning');
@@ -52,7 +59,7 @@ export const Header: React.FC = () => {
           <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3 text-slate-500" />
-              SOL 1050 • 10:45 LST
+              SOL 1050 • {formatLST(timeOfSol)}
             </span>
             <span className="text-slate-600">|</span>
             <span className="flex items-center gap-1 text-emerald-400">

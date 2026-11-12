@@ -12,6 +12,8 @@ import {
   AlertTriangle,
   Download,
   FileText,
+  User,
+  Truck,
 } from 'lucide-react';
 
 interface PlannerPanelProps {
@@ -47,26 +49,30 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
     maxSortieMin,
     setMaxSortieMin,
     setCueCardOpen,
+    mobilityMode,
+    setMobilityMode,
   } = useAppStore();
 
-  const handlePlanRoute = () => {
+  const handlePlanRoute = (modeOverride?: 'foot' | 'rover') => {
     if (!gridMeta || !costGrid || !slopeGrid || !elevGrid || waypoints.length < 2) {
       return;
     }
 
+    const currentMode = modeOverride || mobilityMode;
     setIsPlanning(true);
 
     setTimeout(() => {
       try {
         const planner = new RoutePlanner(gridMeta, costGrid, slopeGrid, elevGrid);
-        const route = planner.planMultiLegRoute(waypoints);
+        const route = planner.planMultiLegRoute(waypoints, currentMode);
         setPlannedRoute(route);
 
         // Generate return envelope from base
         const envelopeGen = new ReturnEnvelopeGenerator(gridMeta, costGrid, slopeGrid);
         const baseCoord = waypoints[0].coordinates;
         const sortieLimit = speActive ? 40.0 : maxSortieMin;
-        const envelope = envelopeGen.generateEnvelopePolygon(baseCoord, sortieLimit, 1.5);
+        const mult = currentMode === 'rover' ? 2.0 : 1.0;
+        const envelope = envelopeGen.generateEnvelopePolygon(baseCoord, sortieLimit, 1.5, mult);
         onEnvelopeGenerated(envelope.geometry.coordinates);
       } catch (err) {
         console.error('Pathfinding failed:', err);
@@ -76,13 +82,19 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
     }, 100);
   };
 
+  const handleModeChange = (mode: 'foot' | 'rover') => {
+    setMobilityMode(mode);
+    handlePlanRoute(mode);
+  };
+
   const handleSortieSlider = (val: number) => {
     setMaxSortieMin(val);
     if (gridMeta && costGrid && slopeGrid && waypoints.length > 0) {
       const envelopeGen = new ReturnEnvelopeGenerator(gridMeta, costGrid, slopeGrid);
       const baseCoord = waypoints[0].coordinates;
       const sortieLimit = speActive ? 40.0 : val;
-      const envelope = envelopeGen.generateEnvelopePolygon(baseCoord, sortieLimit, 1.5);
+      const mult = mobilityMode === 'rover' ? 2.0 : 1.0;
+      const envelope = envelopeGen.generateEnvelopePolygon(baseCoord, sortieLimit, 1.5, mult);
       onEnvelopeGenerated(envelope.geometry.coordinates);
     }
   };
@@ -107,6 +119,8 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
           properties: {
             mission: 'EVA-01 Delta-Prospector',
             site: 'Jezero Crater Western Delta',
+            mobility_mode: plannedRoute.mobilityMode,
+            comms_los_pct: plannedRoute.commsLos_pct,
             total_distance_m: plannedRoute.totalDistance_m,
             total_duration_min: plannedRoute.totalDuration_min,
             max_slope_deg: plannedRoute.maxSlope_deg,
@@ -138,7 +152,7 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
         <div className="flex items-center gap-2">
           <Route className="w-4 h-4 text-cyan-400" />
           <h2 className="text-xs font-mono font-bold tracking-wider uppercase text-slate-100">
-            A* Route & Envelope
+            A* Route & SEXTANT
           </h2>
         </div>
         <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-cyan-400 border border-slate-700">
@@ -147,10 +161,44 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
       </div>
 
       <div className="p-3.5 flex-1 overflow-y-auto space-y-4">
+        {/* Mobility Mode Toggle (Problem Statement & SEXTANT: 2 Astronauts vs Rover Carrier) */}
+        <div className="space-y-1.5">
+          <div className="text-[10px] font-mono uppercase text-slate-400 tracking-wider font-semibold">
+            Traverse Mobility Logistics
+          </div>
+          <div className="grid grid-cols-2 gap-1.5 bg-slate-900/90 p-1 rounded-lg border border-slate-800 text-xs font-mono">
+            <button
+              onClick={() => handleModeChange('foot')}
+              className={`py-1.5 px-2 rounded-md flex items-center justify-center gap-1.5 transition-all ${
+                mobilityMode === 'foot'
+                  ? 'bg-blue-600 text-white font-bold shadow'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>Foot (2 Crew)</span>
+            </button>
+            <button
+              onClick={() => handleModeChange('rover')}
+              className={`py-1.5 px-2 rounded-md flex items-center justify-center gap-1.5 transition-all ${
+                mobilityMode === 'rover'
+                  ? 'bg-amber-600 text-white font-bold shadow'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Truck className="w-3.5 h-3.5" />
+              <span>Rover Carrier</span>
+            </button>
+          </div>
+          <div className="text-[9px] font-mono text-slate-500">
+            {mobilityMode === 'foot' ? '2.5 km/h walking speed • 8h suit O2' : '5.0 km/h rover assist • 12h aux power + tool depot'}
+          </div>
+        </div>
+
         {/* Action Controls */}
         <div className="space-y-2">
           <button
-            onClick={handlePlanRoute}
+            onClick={() => handlePlanRoute()}
             disabled={waypoints.length < 2 || isPlanning}
             className={`w-full py-2.5 px-4 rounded-lg font-mono text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 transition-all shadow-lg ${
               waypoints.length < 2
@@ -243,9 +291,6 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
               <span className="text-slate-500">Slope &gt; 15° Crossings:</span>
               <span className="text-emerald-400 font-bold">0 Violations</span>
             </div>
-            <div className="text-slate-500 text-[9px] pt-1 border-t border-slate-800/60">
-              Validates that NASA rover planners and our A* cost function avoid the same natural scarp hazards.
-            </div>
           </div>
         </div>
 
@@ -288,9 +333,9 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
               </div>
 
               <div className="p-2 rounded bg-slate-950 border border-slate-800/80">
-                <div className="text-[10px] text-slate-500">ELEV GAIN</div>
-                <div className="text-sm font-bold text-slate-300">
-                  +{plannedRoute.elevationGain_m} m
+                <div className="text-[10px] text-slate-500">COMMS DIRECT LOS</div>
+                <div className={`text-sm font-bold ${plannedRoute.commsLos_pct > 80 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                  {plannedRoute.commsLos_pct}% Connected
                 </div>
               </div>
             </div>

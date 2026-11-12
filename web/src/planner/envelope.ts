@@ -16,6 +16,7 @@ export interface EnvelopePolygon {
     maxWalkTimeMin: number;
     speActive: boolean;
     reserveFactor: number;
+    mobilityMultiplier: number;
   };
 }
 
@@ -33,13 +34,15 @@ export class ReturnEnvelopeGenerator {
   /**
    * Computes the Safe Return Envelope polygon from a base shelter point.
    * @param baseLonLat Coordinates [lon, lat] of Habitat Alpha
-   * @param maxSortieMin Available excursion budget (e.g. 180 min nominal, or 35 min during SPE storm)
+   * @param maxSortieMin Available excursion budget (e.g. 180 min nominal, or 40 min during SPE storm)
    * @param reserveFactor Safety factor (default 1.5x)
+   * @param mobilityMultiplier Speed multiplier (1.0 for foot EVA, 2.0 for rover assistant)
    */
   public generateEnvelopePolygon(
     baseLonLat: [number, number],
     maxSortieMin: number = 180.0,
-    reserveFactor: number = 1.5
+    reserveFactor: number = 1.5,
+    mobilityMultiplier: number = 1.0
   ): EnvelopePolygon {
     const [lonMin, latMin, lonMax, latMax] = this.meta.bbox;
     const width = this.meta.width;
@@ -52,7 +55,7 @@ export class ReturnEnvelopeGenerator {
     // One-way maximum walking time in seconds
     const maxOneWaySec = (maxSortieMin * 60.0) / (2.0 * reserveFactor);
 
-    // Cast 36 radial rays (every 10 degrees) to trace the perimeter of the envelope
+    // Cast 48 radial rays to trace the perimeter of the envelope
     const perimeterCoords: [number, number][] = [];
     const numRays = 48;
 
@@ -85,9 +88,10 @@ export class ReturnEnvelopeGenerator {
           break;
         }
 
-        const speedMps = suitWalkingSpeedMps(slopeDeg);
+        const baseSpeed = suitWalkingSpeedMps(slopeDeg);
+        const speedMps = Math.max(0.3, baseSpeed * mobilityMultiplier);
         const stepDistM = this.meta.cell_size_m;
-        const stepTimeSec = (stepDistM / Math.max(0.3, speedMps)) * (1.0 + costVal / 40.0);
+        const stepTimeSec = (stepDistM / speedMps) * (1.0 + costVal / 40.0);
 
         cumTimeSec += stepTimeSec;
         if (cumTimeSec > maxOneWaySec) {
@@ -119,8 +123,8 @@ export class ReturnEnvelopeGenerator {
         maxWalkTimeMin: maxSortieMin,
         speActive: maxSortieMin < 60,
         reserveFactor,
+        mobilityMultiplier,
       },
     };
   }
 }
-

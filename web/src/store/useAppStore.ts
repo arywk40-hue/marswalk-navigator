@@ -19,6 +19,7 @@ interface AppState {
   activeTab: 'layers' | 'planner' | 'safety' | 'pov';
   tourStep: number | null; // Guided tour step (1 - 5)
   maxSortieMin: number; // Excursion budget in minutes
+  mobilityMode: 'foot' | 'rover'; // Foot EVA vs Rover-assisted
 
   // Actions
   setManifest: (manifest: Manifest) => void;
@@ -39,6 +40,7 @@ interface AppState {
   setActiveTab: (tab: 'layers' | 'planner' | 'safety' | 'pov') => void;
   setTourStep: (step: number | null) => void;
   setMaxSortieMin: (mins: number) => void;
+  setMobilityMode: (mode: 'foot' | 'rover') => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -59,6 +61,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   activeTab: 'layers',
   tourStep: null,
   maxSortieMin: 180.0,
+  mobilityMode: 'foot',
 
   setManifest: (manifest) => {
     const visibility: Record<string, boolean> = {};
@@ -128,4 +131,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   setTourStep: (step) => set({ tourStep: step }),
 
   setMaxSortieMin: (mins) => set({ maxSortieMin: mins }),
+
+  setMobilityMode: (mode) => set({ mobilityMode: mode }),
 }));

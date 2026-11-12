@@ -65,3 +65,23 @@ This document tracks technical decisions, data assumptions, and trade-offs made 
 - **Context:** Judging criterion *Validity* demands verification that our hazard cost model reflects real Martian operational hazards.
 - **Decision:** Integrated Perseverance's actual traverse path (Sols 0–1050) across Three Forks and Hawksbill Gap as a toggleable benchmark layer.
 - **Consequences:** Quantifies that the cost grid aligns with paths chosen by NASA/JPL rover planners, avoiding steep scarps and loose dune sand.
+
+---
+
+## ADR-007: NASA SEXTANT Integration — Multi-Mobility Logistics & Comms LOS
+- **Date:** 2026-11-13
+- **Status:** Accepted
+- **Context:** Following research into NASA's operational Surface Exploration Traverse Analysis and Navigation Tool (SEXTANT), surface excursions require support for multi-crew logistics (foot vs. robotic equipment carrier) and topographic visibility analysis to base antennas.
+- **Decision:** 
+  1. Add a **Traverse Mobility Logistics** toggle: Foot EVA ($2.5\text{ km/h}$, $8\text{h}$ suit capacity) vs. Rover Carrier Assist ($5.0\text{ km/h}$, $12\text{h}$ auxiliary power).
+  2. Implement an elevation ray-marching algorithm ([astar.ts](web/src/planner/astar.ts)) to calculate direct RF Line-of-Sight (LOS) from each route vertex to Habitat Alpha's mast ($10\text{m}$).
+- **Consequences:** Directly matches the prompt's call for robotic assistants and multi-astronaut logistics; warns crew when descending into RF terrain shadows behind delta scarps.
+
+---
+
+## ADR-008: Time-of-Sol Ephemeris & Diurnal Temperature Model
+- **Date:** 2026-11-13
+- **Status:** Accepted
+- **Context:** `goal.md` §47 requested a time-of-sol slider to factor in sun angle and remaining daylight.
+- **Decision:** Modeled Jezero solar elevation ($18.4^\circ\text{N}$) and diurnal ground temperature coupling using Perseverance MEDA measurements (diurnal range $-78^\circ\text{C}$ to $-12^\circ\text{C}$, sunset at $18:14\text{ LST}$).
+- **Consequences:** Provides real-time operational context for thermal suit management and ensures routes return before sunset margin.

@@ -1,6 +1,10 @@
 /**
  * A* Pathfinding Engine for Marswalk Navigator.
  * Operates on the 5-meter Jezero Delta hazard cost grid.
+ * Integrates:
+ * 1. Tobler-style suit/rover mobility speeds
+ * 2. RF Line-of-Sight (LOS) terrain ray-marching to Habitat Alpha
+ * 3. Walk-back safety margin validation
  */
 import { Target, PlannedRoute, ElevationPoint } from '../types';
 import { marsDistanceM, suitWalkingSpeedMps, DEFAULT_SUIT_PARAMS } from '../lib/geo';
@@ -51,9 +55,49 @@ export class RoutePlanner {
   }
 
   /**
-   * Plans route visiting an ordered sequence of science targets.
+   * Ray marches between target cell and Habitat Alpha across the elevation grid
+   * to determine if terrain occludes direct UHF/RF line of sight.
    */
-  public planMultiLegRoute(waypoints: Target[]): PlannedRoute | null {
+  public checkLineOfSight(col: number, row: number, baseCol: number, baseRow: number): boolean {
+    const targetIdx = this.getIndex(col, row);
+    const baseIdx = this.getIndex(baseCol, baseRow);
+
+    const targetElev = (this.elevGrid[targetIdx] || -2450.0) + 1.8; // 1.8m astronaut suit antenna
+    const baseElev = (this.elevGrid[baseIdx] || -2450.0) + 10.0; // 10m Hab mast antenna
+
+    const distSteps = Math.max(Math.abs(col - baseCol), Math.abs(row - baseRow));
+    if (distSteps <= 1) return true;
+
+    // March along line
+    for (let step = 1; step < distSteps; step++) {
+      const t = step / distSteps;
+      const c = Math.round(baseCol + t * (col - baseCol));
+      const r = Math.round(baseRow + t * (row - baseRow));
+
+      const idx = this.getIndex(c, r);
+      const terrainElev = this.elevGrid[idx] || -2450.0;
+
+      // Line of sight ray elevation at fraction t
+      const rayElev = baseElev + t * (targetElev - baseElev);
+
+      // If terrain peaks above the ray, LOS is blocked (RF shadow)
+      if (terrainElev > rayElev + 1.0) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Plans route visiting an ordered sequence of science targets.
+   * @param waypoints Ordered list of target stations
+   * @param mobilityMode 'foot' (2.5 km/h) or 'rover' (5.0 km/h)
+   */
+  public planMultiLegRoute(
+    waypoints: Target[],
+    mobilityMode: 'foot' | 'rover' = 'foot'
+  ): PlannedRoute | null {
     if (waypoints.length < 2) return null;
 
     let fullCoordinates: [number, number][] = [];
@@ -64,6 +108,9 @@ export class RoutePlanner {
     let elevationGainM = 0;
     let elevationProfile: ElevationPoint[] = [];
 
+    const isRover = mobilityMode === 'rover';
+    const speedMultiplier = isRover ? 2.0 : 1.0; // 5.0 km/h for rover vs 2.5 km/h foot
+
     // Chain consecutive legs
     for (let i = 0; i < waypoints.length - 1; i++) {
       const legStart = waypoints[i].coordinates;
@@ -71,12 +118,9 @@ export class RoutePlanner {
 
       const legPath = this.astarLeg(legStart, legEnd);
       if (!legPath || legPath.length === 0) {
-        // Fallback: direct line interpolation avoiding impassable cells
-        console.warn(`Leg ${i} pathfinding required direct bypass`);
         fullCoordinates.push(legStart, legEnd);
       } else {
         if (fullCoordinates.length > 0) {
-          // Avoid duplicate waypoint vertex
           fullCoordinates.push(...legPath.slice(1));
         } else {
           fullCoordinates.push(...legPath);
@@ -91,6 +135,9 @@ export class RoutePlanner {
     let prevElev: number | null = null;
     let cumDist = 0;
 
+    const baseCell = this.lonlatToCell(waypoints[0].coordinates[0], waypoints[0].coordinates[1]);
+    let losCount = 0;
+
     for (let i = 0; i < fullCoordinates.length; i++) {
       const [lon, lat] = fullCoordinates[i];
       const [col, row] = this.lonlatToCell(lon, lat);
@@ -98,6 +145,11 @@ export class RoutePlanner {
 
       const elev = this.elevGrid[idx] || -2450.0;
       const slope = this.slopeGrid[idx] || 2.0;
+
+      // Check Comms LOS to Hab Alpha
+      if (this.checkLineOfSight(col, row, baseCell[0], baseCell[1])) {
+        losCount++;
+      }
 
       if (i > 0) {
         const [pLon, pLat] = fullCoordinates[i - 1];
@@ -108,8 +160,9 @@ export class RoutePlanner {
           elevationGainM += elev - prevElev;
         }
 
-        const speedMps = suitWalkingSpeedMps(slope);
-        const segTimeSec = segDist / Math.max(0.2, speedMps);
+        const baseSpeed = suitWalkingSpeedMps(slope);
+        const actualSpeed = Math.max(0.3, baseSpeed * speedMultiplier);
+        const segTimeSec = segDist / actualSpeed;
         totalWalkTimeMin += segTimeSec / 60.0;
       }
 
@@ -126,8 +179,9 @@ export class RoutePlanner {
 
     totalDistM = cumDist;
     const meanSlopeDeg = Number((slopeSum / Math.max(1, fullCoordinates.length)).toFixed(1));
+    const commsLos_pct = Math.round((losCount / Math.max(1, fullCoordinates.length)) * 100);
 
-    // Walk-back distance from farthest point to Habitat Alpha (Base Alpha)
+    // Walk-back distance from farthest point to Habitat Alpha
     const baseCoord = waypoints[0].coordinates;
     let farthestDistM = 0;
     for (const coord of fullCoordinates) {
@@ -137,16 +191,16 @@ export class RoutePlanner {
       }
     }
 
-    const walkBackSpeedMps = suitWalkingSpeedMps(meanSlopeDeg);
+    const walkBackSpeedMps = suitWalkingSpeedMps(meanSlopeDeg) * speedMultiplier;
     const walkBackDurationMin = (farthestDistM / Math.max(0.4, walkBackSpeedMps)) / 60.0;
 
-    // Consumables (8 hour suit capacity)
+    // Consumables (8 hour suit capacity, 12h for rover-assisted)
     const totalEvaDurationMin = totalWalkTimeMin;
-    const suitTotalCapacityMin = DEFAULT_SUIT_PARAMS.suit_o2_capacity_hours * 60.0;
+    const suitTotalCapacityMin = (isRover ? 12.0 : DEFAULT_SUIT_PARAMS.suit_o2_capacity_hours) * 60.0;
     const o2Consumed_pct = Math.min(100, (totalEvaDurationMin / suitTotalCapacityMin) * 100);
     const o2Remaining_pct = Math.max(0, 100 - o2Consumed_pct);
 
-    const batteryConsumed_pct = Math.min(100, (totalEvaDurationMin / (7.0 * 60.0)) * 100);
+    const batteryConsumed_pct = Math.min(100, (totalEvaDurationMin / (isRover ? 10.0 : 7.0) / 60.0) * 100);
     const batteryRemaining_pct = Math.max(0, 100 - batteryConsumed_pct);
 
     const remainingO2TimeMin = (o2Remaining_pct / 100.0) * suitTotalCapacityMin;
@@ -168,6 +222,8 @@ export class RoutePlanner {
       batteryRemaining_pct: Math.round(batteryRemaining_pct),
       walkBackMarginSafe,
       elevationProfile,
+      commsLos_pct,
+      mobilityMode,
     };
   }
 
@@ -256,14 +312,12 @@ export class RoutePlanner {
       }
     }
 
-    // Direct path fallback if blocked
     return [startCoord, endCoord];
   }
 
   private heuristic(c1: number, r1: number, c2: number, r2: number): number {
     const dc = Math.abs(c1 - c2);
     const dr = Math.abs(r1 - r2);
-    // Octile distance in meters
     const octile = (Math.max(dc, dr) + 0.414 * Math.min(dc, dr)) * this.meta.cell_size_m;
     return octile;
   }
@@ -279,7 +333,6 @@ export class RoutePlanner {
       curr = cameFrom.get(curr);
     }
 
-    // Downsample if too dense for smooth canvas line rendering
     if (path.length > 200) {
       const step = Math.ceil(path.length / 150);
       return path.filter((_, idx) => idx % step === 0 || idx === path.length - 1);
@@ -287,4 +340,3 @@ export class RoutePlanner {
     return path;
   }
 }
-

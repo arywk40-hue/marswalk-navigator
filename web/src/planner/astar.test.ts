@@ -3,7 +3,7 @@ import { RoutePlanner, GridMeta } from './astar';
 import { ReturnEnvelopeGenerator } from './envelope';
 import { Target } from '../types';
 
-describe('A* Route Planner & Return Envelope', () => {
+describe('A* Route Planner & SEXTANT Navigation', () => {
   const mockMeta: GridMeta = {
     width: 200,
     height: 200,
@@ -51,9 +51,9 @@ describe('A* Route Planner & Return Envelope', () => {
     },
   ];
 
-  it('plans a valid multi-leg route avoiding obstacles', () => {
+  it('plans a valid multi-leg route avoiding obstacles and calculating Comms LOS', () => {
     const planner = new RoutePlanner(mockMeta, costGrid, slopeGrid, elevGrid);
-    const route = planner.planMultiLegRoute(waypoints);
+    const route = planner.planMultiLegRoute(waypoints, 'foot');
 
     expect(route).not.toBeNull();
     if (route) {
@@ -61,8 +61,10 @@ describe('A* Route Planner & Return Envelope', () => {
       expect(route.totalDistance_m).toBeGreaterThan(0);
       expect(route.totalDuration_min).toBeGreaterThan(30); // includes dwell
       expect(route.walkBackMarginSafe).toBe(true);
+      expect(route.commsLos_pct).toBeGreaterThanOrEqual(0);
+      expect(route.commsLos_pct).toBeLessThanOrEqual(100);
 
-      // Verify that no vertex lands on an impassable cell (col 10, rows 0-14)
+      // Verify that no vertex lands on an impassable cell (col 160, rows 0-140)
       for (const [lon, lat] of route.coordinates) {
         const [c, r] = planner.lonlatToCell(lon, lat);
         const idx = r * mockMeta.width + c;
@@ -71,23 +73,37 @@ describe('A* Route Planner & Return Envelope', () => {
     }
   });
 
+  it('calculates rover-assisted traverse with higher speed and reduced transit time', () => {
+    const planner = new RoutePlanner(mockMeta, costGrid, slopeGrid, elevGrid);
+    const footRoute = planner.planMultiLegRoute(waypoints, 'foot');
+    const roverRoute = planner.planMultiLegRoute(waypoints, 'rover');
+
+    expect(footRoute).not.toBeNull();
+    expect(roverRoute).not.toBeNull();
+
+    if (footRoute && roverRoute) {
+      expect(roverRoute.totalDistance_m).toBeCloseTo(footRoute.totalDistance_m, -2);
+      // Rover transit duration should be strictly faster than foot
+      expect(roverRoute.totalDuration_min).toBeLessThan(footRoute.totalDuration_min);
+      expect(roverRoute.mobilityMode).toBe('rover');
+    }
+  });
+
   it('generates a closed Safe Return Envelope polygon that contracts under emergency time limit', () => {
     const envelopeGen = new ReturnEnvelopeGenerator(mockMeta, costGrid, slopeGrid);
 
-    // 1. Long excursion envelope (hits outer barrier)
+    // 1. Long excursion envelope
     const nominalEnvelope = envelopeGen.generateEnvelopePolygon([77.44, 18.435], 5.0, 1.0);
     expect(nominalEnvelope.geometry.type).toBe('Polygon');
     const nomCoords = nominalEnvelope.geometry.coordinates[0];
     expect(nomCoords.length).toBeGreaterThan(10);
-    // Closed loop
     expect(nomCoords[0]).toEqual(nomCoords[nomCoords.length - 1]);
 
-    // 2. Short 0.5 min emergency envelope (reaches only a fraction of the distance)
+    // 2. Short 0.5 min emergency envelope
     const shortEnvelope = envelopeGen.generateEnvelopePolygon([77.44, 18.435], 0.5, 1.0);
     const shortCoords = shortEnvelope.geometry.coordinates[0];
     expect(shortCoords.length).toBeGreaterThan(10);
 
-    // Check that nominal envelope covers a larger perimeter than emergency envelope
     const nomSpan = Math.abs(nomCoords[0][0] - 77.44);
     const shortSpan = Math.abs(shortCoords[0][0] - 77.44);
     expect(nomSpan).toBeGreaterThan(shortSpan);

@@ -78,6 +78,8 @@ export interface PlannedRoute {
   batteryRemaining_pct: number;
   walkBackMarginSafe: boolean;
   elevationProfile: ElevationPoint[];
+  commsLos_pct: number; // Line of sight to Habitat Alpha
+  mobilityMode: 'foot' | 'rover';
 }
 
 export type SafetyLevel = 'ok' | 'caution' | 'critical';
