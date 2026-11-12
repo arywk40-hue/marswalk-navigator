@@ -109,6 +109,32 @@ export const MapView: React.FC<MapViewProps> = ({
         const targetData = feature.get('targetData') as Target | undefined;
         if (targetData) {
           setSelectedTarget(targetData);
+          return;
+        }
+      }
+
+      // If clicked on open terrain, create a custom survey stop
+      const coord = evt.coordinate;
+      if (coord) {
+        const lon = Number(coord[0].toFixed(5));
+        const lat = Number(coord[1].toFixed(5));
+
+        if (lon >= 77.40 && lon <= 77.48 && lat >= 18.40 && lat <= 18.47) {
+          const currentTargets = useAppStore.getState().targets;
+          const customTarget: Target = {
+            id: `CUSTOM-${Date.now()}`,
+            name: `Field Survey Point ${currentTargets.length}`,
+            category: 'Field Observation',
+            coordinates: [lon, lat],
+            science_value: 4,
+            priority: 'Opportunity',
+            reason: `Astronaut-designated surface observation stop at ${lon}°E, ${lat}°N.`,
+            layer_evidence: ['In-Situ Field Choice'],
+            estimated_dwell_min: 20,
+            recommended_tools: ['Multispectral imager', 'Regolith scoop'],
+          };
+          useAppStore.getState().setTargets([...currentTargets, customTarget]);
+          useAppStore.getState().setSelectedTarget(customTarget);
         }
       }
     });

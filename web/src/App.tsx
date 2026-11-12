@@ -8,6 +8,7 @@ import { SafetyPanel } from './safety/SafetyPanel';
 import { PovPanel } from './pov/PovPanel';
 import { GuidedTourModal } from './components/GuidedTourModal';
 import { AssumptionsModal } from './components/AssumptionsModal';
+import { CueCardModal } from './components/CueCardModal';
 import { Manifest, Target } from './types';
 import { GridMeta, RoutePlanner } from './planner/astar';
 import { ReturnEnvelopeGenerator } from './planner/envelope';
@@ -366,6 +367,7 @@ export const App: React.FC = () => {
         }}
       />
       <AssumptionsModal />
+      <CueCardModal />
     </div>
   );
 };

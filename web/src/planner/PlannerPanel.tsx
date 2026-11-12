@@ -10,6 +10,8 @@ import {
   Layers,
   CheckCircle2,
   AlertTriangle,
+  Download,
+  FileText,
 } from 'lucide-react';
 
 interface PlannerPanelProps {
@@ -44,6 +46,7 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
     speActive,
     maxSortieMin,
     setMaxSortieMin,
+    setCueCardOpen,
   } = useAppStore();
 
   const handlePlanRoute = () => {
@@ -82,6 +85,50 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
       const envelope = envelopeGen.generateEnvelopePolygon(baseCoord, sortieLimit, 1.5);
       onEnvelopeGenerated(envelope.geometry.coordinates);
     }
+  };
+
+  const handleExportGeoJSON = () => {
+    if (!plannedRoute) return;
+
+    const geojsonData = {
+      type: 'FeatureCollection',
+      name: 'Marswalk Navigator Planned EVA Route',
+      crs: {
+        type: 'name',
+        properties: { name: 'urn:ogc:def:crs:OGC:1.3:CRS84' },
+      },
+      features: [
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'LineString',
+            coordinates: plannedRoute.coordinates,
+          },
+          properties: {
+            mission: 'EVA-01 Delta-Prospector',
+            site: 'Jezero Crater Western Delta',
+            total_distance_m: plannedRoute.totalDistance_m,
+            total_duration_min: plannedRoute.totalDuration_min,
+            max_slope_deg: plannedRoute.maxSlope_deg,
+            mean_slope_deg: plannedRoute.meanSlope_deg,
+            elevation_gain_m: plannedRoute.elevationGain_m,
+            walk_back_distance_m: plannedRoute.walkBackDistance_m,
+            walk_back_safe: plannedRoute.walkBackMarginSafe,
+            o2_remaining_pct: plannedRoute.o2Remaining_pct,
+          },
+        },
+      ],
+    };
+
+    const blob = new Blob([JSON.stringify(geojsonData, null, 2)], {
+      type: 'application/geo+json',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `marswalk_route_jezero_${Date.now()}.geojson`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -299,6 +346,26 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
                 </div>
               </div>
             )}
+
+            {/* Astronaut Flight Exports (GeoJSON & Cue Card) */}
+            <div className="pt-2 border-t border-slate-800 flex gap-2">
+              <button
+                onClick={handleExportGeoJSON}
+                className="flex-1 py-1.5 px-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-mono font-medium rounded-lg flex items-center justify-center gap-1.5 border border-slate-700 transition-colors"
+                title="Download Route as Standard GIS GeoJSON"
+              >
+                <Download className="w-3.5 h-3.5 text-cyan-400" />
+                Export GeoJSON
+              </button>
+              <button
+                onClick={() => setCueCardOpen(true)}
+                className="flex-1 py-1.5 px-2 bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 text-[11px] font-mono font-medium rounded-lg flex items-center justify-center gap-1.5 border border-amber-500/50 transition-colors"
+                title="Open Astronaut Suit Cuff Checklist"
+              >
+                <FileText className="w-3.5 h-3.5 text-amber-400" />
+                EVA Cue Card
+              </button>
+            </div>
           </div>
         )}
       </div>

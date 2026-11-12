@@ -15,6 +15,7 @@ interface AppState {
   speActive: boolean; // Solar Particle Event scenario
   timeOfSol: number; // decimal hours (0 - 24)
   assumptionsOpen: boolean;
+  cueCardOpen: boolean;
   activeTab: 'layers' | 'planner' | 'safety' | 'pov';
   tourStep: number | null; // Guided tour step (1 - 5)
   maxSortieMin: number; // Excursion budget in minutes
@@ -34,6 +35,7 @@ interface AppState {
   toggleSpe: () => void;
   setTimeOfSol: (hour: number) => void;
   setAssumptionsOpen: (open: boolean) => void;
+  setCueCardOpen: (open: boolean) => void;
   setActiveTab: (tab: 'layers' | 'planner' | 'safety' | 'pov') => void;
   setTourStep: (step: number | null) => void;
   setMaxSortieMin: (mins: number) => void;
@@ -53,6 +55,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   speActive: false,
   timeOfSol: 10.75, // 10:45 LST
   assumptionsOpen: false,
+  cueCardOpen: false,
   activeTab: 'layers',
   tourStep: null,
   maxSortieMin: 180.0,
@@ -117,6 +120,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   setTimeOfSol: (hour) => set({ timeOfSol: hour }),
 
   setAssumptionsOpen: (open) => set({ assumptionsOpen: open }),
+
+  setCueCardOpen: (open) => set({ cueCardOpen: open }),
 
   setActiveTab: (tab) => set({ activeTab: tab }),
 
