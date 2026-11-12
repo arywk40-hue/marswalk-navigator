@@ -1,0 +1,45 @@
+aoi:
+  name: "Jezero Crater Western Delta Front"
+  description: "Perseverance traverse zone encompassing Three Forks, Hawksbill Gap, and Kodiak vicinity"
+  bbox: [77.40, 18.40, 77.48, 18.47]  # [lon_min, lat_min, lon_max, lat_max] in degrees East/North
+  center: [77.44, 18.435]
+  crs: "IAU2000:49900 (Mars 2000 Sphere, R=3396190m)"
+  grid_resolution_m: 5.0
+  limits:
+    hard_slope_deg: 15.0
+    caution_slope_deg: 10.0
+    hazard_buffer_m: 10.0
+
+science_objectives:
+  - id: "OBJ-01"
+    name: "Delta-Front Sedimentary Stratigraphy"
+    location_desc: "Hawksbill Gap / Kodiak outlier"
+    target_type: "sedimentary_outcrop"
+    science_value: 5
+    rationale: "Sample finely laminated mudstones and siltstones to evaluate ancient Jezero paleolake habitability and biosignature preservation potential."
+    layer_evidence: ["HiRISE Optical", "HiRISE DTM Slope", "CRISM Phyllosilicates"]
+    estimated_dwell_min: 45
+
+  - id: "OBJ-02"
+    name: "Margin Carbonate Outcrop Inspection"
+    location_desc: "Inner Delta margin carbonate unit"
+    target_type: "carbonate_deposit"
+    science_value: 5
+    rationale: "Investigate hydrated magnesium carbonates identified in orbital CRISM spectral parameters; key target for biosignature entrapment."
+    layer_evidence: ["CRISM Carbonate Index", "THEMIS Thermal Inertia", "Perseverance PIXL Targets"]
+    estimated_dwell_min: 60
+
+  - id: "OBJ-03"
+    name: "Flat Regolith & Aeolian Sand In-Situ Baseline"
+    location_desc: "Smooth inter-dune regolith corridor"
+    target_type: "regolith_aeolian"
+    science_value: 3
+    rationale: "Gather undisturbed surface regolith and measure local dust cohesion and suit soil sinkage in low-hazard flat terrain."
+    layer_evidence: ["THEMIS Low Roughness", "Derived Slope < 5 deg", "MEDA Wind Sensor Area"]
+    estimated_dwell_min: 30
+
+landing_shelter:
+  id: "HAB-ALPHA"
+  name: "Artemis-Mars Surface Habitat Alpha / Pressurized Rover Staging"
+  coordinates: [77.435, 18.420]
+  type: "habitat_shelter"

@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+dist-ssr/
+*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+eggs/
+parts/
+var/
+sdist/
+*.egg-info/
+
+# Pipeline cache & raw data downloads (per architecture.md §3 & §5)
+pipeline/cache/
+.pytest_cache/
+
+# Testing & logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+coverage/
+.vitest/
+
+# OS
+.DS_Store
+Thumbs.db

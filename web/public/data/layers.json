@@ -1,0 +1,153 @@
+{
+  "aoi": {
+    "name": "Jezero Crater Western Delta Front",
+    "bbox": [77.40, 18.40, 77.48, 18.47],
+    "center": [77.44, 18.435],
+    "crs": "IAU2000:49900 (Mars 2000 Sphere, R=3396190m)",
+    "gridRes_m": 5
+  },
+  "layers": [
+    {
+      "id": "hirise_basemap",
+      "label": "MRO HiRISE 25cm Controlled Ortho",
+      "type": "raster-tiles",
+      "category": "optical",
+      "url": "https://trek.nasa.gov/tiles/Mars/EQ/JEZ_hirise_soc_006_orthoMosaic_25cm_Eqc_latTs0_lon0_first_dd/1.0.0//default/default028mm/{z}/{y}/{x}.jpg",
+      "fallbackUrl": "data/tiles/hirise/{z}/{x}/{y}.png",
+      "resolution_m": 0.25,
+      "source": "MRO / HiRISE (NASA / JPL / Univ of Arizona / USGS)",
+      "productId": "JEZ_hirise_soc_006_orthoMosaic_25cm_Eqc_latTs0_lon0_first_dd",
+      "date": "2020-03-01",
+      "link": "https://trek.nasa.gov/mars/",
+      "provenance": "real",
+      "legend": { "kind": "none", "stops": [] },
+      "defaultOpacity": 1.0,
+      "defaultVisible": true
+    },
+    {
+      "id": "mola_dem",
+      "label": "MOLA/HRSC Topography DEM",
+      "type": "raster-tiles",
+      "category": "topographic",
+      "url": "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/{z}/{y}/{x}.jpg",
+      "fallbackUrl": "data/tiles/elevation/{z}/{x}/{y}.png",
+      "resolution_m": 463.0,
+      "source": "MGS MOLA (NASA GSFC / JPL)",
+      "productId": "Mars_MGS_MOLA_ClrShade_merge_global_463m",
+      "date": "2003-05-15",
+      "link": "https://trek.nasa.gov/mars/",
+      "provenance": "real",
+      "legend": {
+        "kind": "gradient",
+        "title": "Elevation (m)",
+        "stops": [
+          { "value": -2600, "color": "#1e3a8a", "label": "-2600m" },
+          { "value": -2400, "color": "#0284c7", "label": "-2400m" },
+          { "value": -2200, "color": "#10b981", "label": "-2200m" },
+          { "value": -2000, "color": "#f59e0b", "label": "-2000m" },
+          { "value": -1800, "color": "#b91c1c", "label": "-1800m" }
+        ]
+      },
+      "defaultOpacity": 0.7,
+      "defaultVisible": false
+    },
+    {
+      "id": "derived_slope",
+      "label": "Derived Surface Slope (°)",
+      "type": "raster",
+      "category": "topographic",
+      "url": "data/tiles/slope/{z}/{x}/{y}.png",
+      "resolution_m": 5.0,
+      "source": "Derived from HiRISE DTM (Horn method)",
+      "productId": "DERIVED_SLOPE_JEZERO_5M",
+      "date": "2026-11-12",
+      "link": "https://astrogeology.usgs.gov/",
+      "provenance": "derived",
+      "legend": {
+        "kind": "gradient",
+        "title": "Slope Angle (°)",
+        "stops": [
+          { "value": 0, "color": "#22c55e", "label": "0° (Flat / Safe)" },
+          { "value": 10, "color": "#eab308", "label": "10° (Caution limit)" },
+          { "value": 15, "color": "#ef4444", "label": "15° (Hard suit limit)" },
+          { "value": 25, "color": "#7f1d1d", "label": "25°+ (Impassable Cliff)" }
+        ]
+      },
+      "defaultOpacity": 0.65,
+      "defaultVisible": false
+    },
+    {
+      "id": "themis_thermal",
+      "label": "THEMIS Night IR (Thermal Inertia / Rock Proxy)",
+      "type": "raster",
+      "category": "thermal",
+      "url": "data/tiles/thermal/{z}/{x}/{y}.png",
+      "resolution_m": 100.0,
+      "source": "2001 Mars Odyssey THEMIS (NASA / ASU)",
+      "productId": "THEMIS_IR_NIGHT_JEZERO",
+      "date": "2018-09-01",
+      "link": "https://themis.asu.edu/",
+      "provenance": "real",
+      "legend": {
+        "kind": "gradient",
+        "title": "Thermal Inertia ($J m^{-2} K^{-1} s^{-1/2}$)",
+        "stops": [
+          { "value": 150, "color": "#312e81", "label": "150 (Fine sand/dust)" },
+          { "value": 350, "color": "#0d9488", "label": "350 (Duricrust/pebbles)" },
+          { "value": 600, "color": "#f97316", "label": "600+ (Bedrock/boulders)" }
+        ]
+      },
+      "defaultOpacity": 0.6,
+      "defaultVisible": false
+    },
+    {
+      "id": "crism_minerals",
+      "label": "CRISM Mineral Summary (Carbonates & Smectite Clays)",
+      "type": "raster",
+      "category": "spectral",
+      "url": "data/tiles/crism/{z}/{x}/{y}.png",
+      "resolution_m": 18.0,
+      "source": "MRO CRISM (JHU-APL / NASA)",
+      "productId": "FRT0000B5B4_07_IF166L_TRR3",
+      "date": "2008-08-14",
+      "link": "https://crism.jhuapl.edu/",
+      "provenance": "real",
+      "legend": {
+        "kind": "categorical",
+        "title": "Mineral Signature",
+        "stops": [
+          { "value": 1, "color": "#38bdf8", "label": "Fe/Mg Smectite Clays" },
+          { "value": 2, "color": "#a855f7", "label": "Magnesium Carbonate" },
+          { "value": 3, "color": "#eab308", "label": "Olivine-rich sand" }
+        ]
+      },
+      "defaultOpacity": 0.7,
+      "defaultVisible": false
+    },
+    {
+      "id": "hazard_cost",
+      "label": "Composite Traversal Hazard Cost",
+      "type": "raster",
+      "category": "hazard",
+      "url": "data/tiles/hazard/{z}/{x}/{y}.png",
+      "resolution_m": 5.0,
+      "source": "Synthesized: Slope + Rockiness + Soft Sand proxies",
+      "productId": "HAZARD_COST_GRID_5M",
+      "date": "2026-11-12",
+      "link": "",
+      "provenance": "model",
+      "legend": {
+        "kind": "gradient",
+        "title": "Relative Travel Cost",
+        "stops": [
+          { "value": 1, "color": "#10b981", "label": "1.0 (Optimal smooth)" },
+          { "value": 5, "color": "#f59e0b", "label": "5.0 (Moderate effort)" },
+          { "value": 15, "color": "#ef4444", "label": "15.0 (High hazard)" },
+          { "value": 255, "color": "#000000", "label": "No-Go (Impassable)" }
+        ]
+      },
+      "defaultOpacity": 0.5,
+      "defaultVisible": false
+    }
+  ]
+}

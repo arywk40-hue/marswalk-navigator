@@ -1,0 +1,77 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.442, 18.438]
+      },
+      "properties": {
+        "id": "SCI-01",
+        "name": "Hawksbill Gap Delta Scarp",
+        "category": "Sedimentary Outcrop",
+        "science_value": 5,
+        "priority": "Critical",
+        "reason": "Exposed layered deltaic mudstone with high biosignature preservation potential.",
+        "layer_evidence": ["HiRISE 25cm Ortho", "HiRISE 1m DTM", "CRISM Smectite Clays"],
+        "estimated_dwell_min": 45,
+        "recommended_tools": ["Hand lens spectrometer", "Subsurface regolith core drill"]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.456, 18.448]
+      },
+      "properties": {
+        "id": "SCI-02",
+        "name": "Hogwallow Flats Carbonates",
+        "category": "Mineral Outcrop",
+        "science_value": 5,
+        "priority": "High",
+        "reason": "Orbital CRISM strong magnesium carbonate signature along the inner delta scarp.",
+        "layer_evidence": ["CRISM Carbonate Index", "THEMIS Thermal Inertia"],
+        "estimated_dwell_min": 60,
+        "recommended_tools": ["Raman & Luminescence spectrometer", "Chipping hammer"]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.428, 18.428]
+      },
+      "properties": {
+        "id": "SCI-03",
+        "name": "Kodiak Mesa Outlier Base",
+        "category": "Geomorphology",
+        "science_value": 4,
+        "priority": "Medium",
+        "reason": "Truncated delta remnant showing bottomset-to-topset bedding transition.",
+        "layer_evidence": ["HiRISE 25cm Ortho", "Derived Slope 12°"],
+        "estimated_dwell_min": 30,
+        "recommended_tools": ["Panoramic multispectral camera", "Laser rangefinder"]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.435, 18.420]
+      },
+      "properties": {
+        "id": "BASE-ALPHA",
+        "name": "Surface Habitat Alpha (Lander Staging)",
+        "category": "Habitat & Shelter",
+        "science_value": 0,
+        "priority": "Base",
+        "reason": "Primary pressurized habitat, suit recharging station, and SPE storm shelter.",
+        "layer_evidence": ["Hazard Cost 1.0", "Slope < 2°"],
+        "estimated_dwell_min": 0,
+        "recommended_tools": []
+      }
+    }
+  ]
+}

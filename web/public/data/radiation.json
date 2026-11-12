@@ -1,0 +1,19 @@
+{
+  "baseline_dose_uSv_per_h": 9.5,
+  "daily_dose_mSv": 0.228,
+  "source": "Curiosity MSL RAD (Radiation Assessment Detector) surface measurement",
+  "provenance": "derived",
+  "caveat": "Gale Crater MSL RAD surface measurement used as Jezero surface proxy (GCR dominated). Values confirmed with Zeitlin et al. (Science 2013) and Hassler et al.",
+  "limits": {
+    "eva_dose_limit_mSv": 1.0,
+    "annual_career_limit_mSv": 600.0,
+    "note": "NASA Standard 3001 astronaut operational radiation exposure limits"
+  },
+  "spe_scenario": {
+    "event_name": "Solar Particle Event (SPE) Hard Flux",
+    "multiplier": 10.0,
+    "active_dose_uSv_per_h": 95.0,
+    "shelter_time_required_min": 45,
+    "description": "Coronal Mass Ejection shock arrival on Mars; high solar energetic proton flux requiring abort to Hab or regolith storm shelter."
+  }
+}
