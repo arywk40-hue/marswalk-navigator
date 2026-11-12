@@ -46,3 +46,4 @@ def compute_hazard_cost(
     cost_scaled[impassable_mask] = 255
 
     return cost_scaled
+

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAppStore } from './store/useAppStore';
 import { Header } from './components/Header';
 import { MapView } from './map/MapView';
@@ -6,9 +6,11 @@ import { LayerPanel } from './map/LayerPanel';
 import { PlannerPanel } from './planner/PlannerPanel';
 import { SafetyPanel } from './safety/SafetyPanel';
 import { PovPanel } from './pov/PovPanel';
+import { GuidedTourModal } from './components/GuidedTourModal';
 import { AssumptionsModal } from './components/AssumptionsModal';
 import { Manifest, Target } from './types';
-import { GridMeta } from './planner/astar';
+import { GridMeta, RoutePlanner } from './planner/astar';
+import { ReturnEnvelopeGenerator } from './planner/envelope';
 import { ShieldAlert, Plus, RotateCcw } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -25,6 +27,8 @@ export const App: React.FC = () => {
     speActive,
     activeTab,
     plannedRoute,
+    setPlannedRoute,
+    maxSortieMin,
   } = useAppStore();
 
   const [loading, setLoading] = useState(true);
@@ -36,6 +40,19 @@ export const App: React.FC = () => {
   const [showEnvelope, setShowEnvelope] = useState(true);
   const [showTraverse, setShowTraverse] = useState(true);
 
+  // Helper to plan current route
+  const planCurrentWaypoints = useCallback((meta: GridMeta, cGrid: Uint8Array, sGrid: Uint8Array, eGrid: Float32Array, wps: Target[]) => {
+    if (wps.length < 2) return;
+    try {
+      const planner = new RoutePlanner(meta, cGrid, sGrid, eGrid);
+      const route = planner.planMultiLegRoute(wps);
+      setPlannedRoute(route);
+    } catch (err) {
+      console.error('Failed auto-route:', err);
+    }
+  }, [setPlannedRoute]);
+
+  // Initial Data Load
   useEffect(() => {
     async function loadInitialData() {
       try {
@@ -48,6 +65,8 @@ export const App: React.FC = () => {
           fetch('./data/grid/elev.bin'),
         ]);
 
+        let parsedTargets: Target[] = [];
+
         if (layersRes.ok) {
           const manifestData: Manifest = await layersRes.json();
           setManifest(manifestData);
@@ -55,7 +74,7 @@ export const App: React.FC = () => {
 
         if (targetsRes.ok) {
           const targetsGeo = await targetsRes.json();
-          const parsedTargets: Target[] = targetsGeo.features.map((f: any) => ({
+          parsedTargets = targetsGeo.features.map((f: any) => ({
             id: f.properties.id,
             name: f.properties.name,
             category: f.properties.category,
@@ -68,12 +87,6 @@ export const App: React.FC = () => {
             recommended_tools: f.properties.recommended_tools || [],
           }));
           setTargets(parsedTargets);
-
-          // Default waypoints: Base Alpha + Hawksbill Gap (SCI-01)
-          if (parsedTargets.length >= 2) {
-            addWaypoint(parsedTargets[3]); // Base Alpha
-            addWaypoint(parsedTargets[0]); // Hawksbill Gap
-          }
         }
 
         if (metaRes.ok && costRes.ok && slopeRes.ok && elevRes.ok) {
@@ -82,10 +95,28 @@ export const App: React.FC = () => {
           const slopeBuf = await slopeRes.arrayBuffer();
           const elevBuf = await elevRes.arrayBuffer();
 
+          const cGrid = new Uint8Array(costBuf);
+          const sGrid = new Uint8Array(slopeBuf);
+          const eGrid = new Float32Array(elevBuf);
+
           setGridMeta(meta);
-          setCostGrid(new Uint8Array(costBuf));
-          setSlopeGrid(new Uint8Array(slopeBuf));
-          setElevGrid(new Float32Array(elevBuf));
+          setCostGrid(cGrid);
+          setSlopeGrid(sGrid);
+          setElevGrid(eGrid);
+
+          // Hero Feature on Initial Load: Generate Safe Return Envelope from Base Alpha [77.435, 18.420]
+          const baseCoord: [number, number] = [77.435, 18.420];
+          const envelopeGen = new ReturnEnvelopeGenerator(meta, cGrid, sGrid);
+          const envelope = envelopeGen.generateEnvelopePolygon(baseCoord, 180.0, 1.5);
+          setEnvelopeCoords(envelope.geometry.coordinates);
+
+          // Default planned route: Base Alpha + Hawksbill Gap
+          if (parsedTargets.length >= 2) {
+            const initialWps = [parsedTargets[3], parsedTargets[0]];
+            addWaypoint(parsedTargets[3]);
+            addWaypoint(parsedTargets[0]);
+            planCurrentWaypoints(meta, cGrid, sGrid, eGrid, initialWps);
+          }
         }
       } catch (err) {
         console.error('Failed to load initial data:', err);
@@ -95,7 +126,18 @@ export const App: React.FC = () => {
     }
 
     loadInitialData();
-  }, [setManifest, setTargets, addWaypoint]);
+  }, [setManifest, setTargets, addWaypoint, planCurrentWaypoints]);
+
+  // Recalculate envelope when SPE changes
+  useEffect(() => {
+    if (gridMeta && costGrid && slopeGrid) {
+      const baseCoord: [number, number] = [77.435, 18.420];
+      const envelopeGen = new ReturnEnvelopeGenerator(gridMeta, costGrid, slopeGrid);
+      const sortieLimit = speActive ? 40.0 : maxSortieMin;
+      const envelope = envelopeGen.generateEnvelopePolygon(baseCoord, sortieLimit, 1.5);
+      setEnvelopeCoords(envelope.geometry.coordinates);
+    }
+  }, [speActive, maxSortieMin, gridMeta, costGrid, slopeGrid]);
 
   const isHud = displayMode === 'hud';
 
@@ -316,6 +358,13 @@ export const App: React.FC = () => {
         )}
       </div>
 
+      <GuidedTourModal
+        onPlanRouteAction={() => {
+          if (gridMeta && costGrid && slopeGrid && elevGrid && waypoints.length >= 2) {
+            planCurrentWaypoints(gridMeta, costGrid, slopeGrid, elevGrid, waypoints);
+          }
+        }}
+      />
       <AssumptionsModal />
     </div>
   );

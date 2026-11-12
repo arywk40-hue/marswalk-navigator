@@ -75,3 +75,4 @@ class MarsGrid:
         dem += ripples
 
         return dem.astype(np.float32)
+

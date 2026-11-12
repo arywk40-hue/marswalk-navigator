@@ -52,3 +52,4 @@ def test_hazard_cost_impassable_boundary():
     assert cost[2, 0] == 255
     assert cost[2, 1] == 255
     assert cost[2, 2] == 255
+

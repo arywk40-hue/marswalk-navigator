@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAppStore } from '../store/useAppStore';
-import { ShieldAlert, Compass, Eye, Info, Clock, Radio } from 'lucide-react';
+import { ShieldAlert, Compass, Eye, Info, Clock, Radio, Sparkles } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const {
@@ -11,15 +11,23 @@ export const Header: React.FC = () => {
     setAssumptionsOpen,
     activeTab,
     setActiveTab,
+    tourStep,
+    setTourStep,
   } = useAppStore();
 
   const isHud = displayMode === 'hud';
+
+  const handleStartTour = () => {
+    setDisplayMode('planning');
+    setActiveTab('layers');
+    setTourStep(1);
+  };
 
   return (
     <header className={`border-b transition-colors ${
       isHud 
         ? 'bg-black border-amber-500/40 text-amber-400' 
-        : 'bg-[#12141a]/95 border-slate-800 text-slate-100 backdrop-blur'
+        : 'bg-[#12141c]/95 border-slate-800 text-slate-100 backdrop-blur'
     } px-4 py-2.5 flex items-center justify-between select-none z-30`}>
       {/* Brand & Mission Status */}
       <div className="flex items-center gap-3">
@@ -64,7 +72,7 @@ export const Header: React.FC = () => {
               activeTab === 'layers' ? 'bg-slate-700 text-white shadow' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            Data Layers (≥5)
+            Data Layers (6)
           </button>
           <button
             onClick={() => setActiveTab('planner')}
@@ -95,6 +103,20 @@ export const Header: React.FC = () => {
 
       {/* Scenario controls & Mode switch */}
       <div className="flex items-center gap-2.5">
+        {/* Interactive Guided Tour Trigger */}
+        <button
+          onClick={handleStartTour}
+          className={`px-2.5 py-1.5 rounded-md text-xs font-mono font-bold flex items-center gap-1.5 border transition-all ${
+            tourStep !== null
+              ? 'bg-cyan-600 text-white border-cyan-400 shadow-lg shadow-cyan-950 animate-pulse'
+              : 'bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-600 hover:to-indigo-700 text-white border-blue-500/50 shadow'
+          }`}
+          title="Start 60-Second Interactive Demo Tour for Hackathon Judges"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-cyan-300" />
+          <span className="hidden sm:inline">60s Demo Tour</span>
+        </button>
+
         {/* SPE Storm Toggle Button */}
         <button
           onClick={toggleSpe}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { POVImage, Target } from '../types';
-import { Camera } from 'lucide-react';
+import { Camera, Layers, CheckCircle2 } from 'lucide-react';
 
 export const PovPanel: React.FC = () => {
   const { selectedTarget, targets, setSelectedTarget } = useAppStore();
@@ -80,9 +80,13 @@ export const PovPanel: React.FC = () => {
               </span>
             </div>
 
-            {/* Real Surface Image Photo */}
+            {/* Step 1: Real Ground-Truth Surface Image Photo */}
             {activeImage && (
               <div className="space-y-2">
+                <div className="text-[10px] font-mono uppercase text-slate-400 font-semibold flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  Expected Ground View (Perseverance)
+                </div>
                 <div className="relative rounded-lg overflow-hidden border border-slate-700 group bg-black aspect-video flex items-center justify-center">
                   <img
                     src={activeImage.imageUrl}
@@ -109,10 +113,33 @@ export const PovPanel: React.FC = () => {
               </div>
             )}
 
-            {/* Planned Science Objectives & Tools */}
+            {/* Step 2: Planned Orbital & Derived Hazard Context */}
+            <div className="pt-2 border-t border-slate-800 space-y-1.5 text-xs font-mono">
+              <div className="text-[10px] uppercase text-slate-400 font-semibold flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                Orbital & Derived Physics Context
+              </div>
+              <div className="p-2 rounded bg-slate-950 border border-slate-800/80 space-y-1 text-[11px]">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Coordinates:</span>
+                  <span className="text-slate-300">{activeTarget.coordinates[0]}°E, {activeTarget.coordinates[1]}°N</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Spectral Evidence:</span>
+                  <span className="text-cyan-400">{activeTarget.layer_evidence.join(', ')}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Estimated Dwell Time:</span>
+                  <span className="text-amber-300">~{activeTarget.estimated_dwell_min} min</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3: Planned Sampling Protocol & Tools */}
             <div className="pt-2 border-t border-slate-800 space-y-1.5 text-xs">
-              <div className="text-[10px] font-mono uppercase text-slate-400 font-semibold">
-                Sampling Protocol & Tools
+              <div className="text-[10px] font-mono uppercase text-slate-400 font-semibold flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                Astronaut Sampling Protocol
               </div>
               <ul className="space-y-1 text-slate-300 text-[11px] font-mono">
                 {activeTarget.recommended_tools.map((tool, idx) => (

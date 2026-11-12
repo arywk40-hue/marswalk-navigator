@@ -38,3 +38,4 @@ def compute_roughness(dem: np.ndarray, window_size: int = 5) -> np.ndarray:
     from scipy.ndimage import maximum_filter, minimum_filter
     roughness = maximum_filter(dem, size=window_size) - minimum_filter(dem, size=window_size)
     return roughness.astype(np.float32)
+

@@ -16,6 +16,8 @@ interface AppState {
   timeOfSol: number; // decimal hours (0 - 24)
   assumptionsOpen: boolean;
   activeTab: 'layers' | 'planner' | 'safety' | 'pov';
+  tourStep: number | null; // Guided tour step (1 - 5)
+  maxSortieMin: number; // Excursion budget in minutes
 
   // Actions
   setManifest: (manifest: Manifest) => void;
@@ -33,6 +35,8 @@ interface AppState {
   setTimeOfSol: (hour: number) => void;
   setAssumptionsOpen: (open: boolean) => void;
   setActiveTab: (tab: 'layers' | 'planner' | 'safety' | 'pov') => void;
+  setTourStep: (step: number | null) => void;
+  setMaxSortieMin: (mins: number) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -50,6 +54,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   timeOfSol: 10.75, // 10:45 LST
   assumptionsOpen: false,
   activeTab: 'layers',
+  tourStep: null,
+  maxSortieMin: 180.0,
 
   setManifest: (manifest) => {
     const visibility: Record<string, boolean> = {};
@@ -113,4 +119,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   setAssumptionsOpen: (open) => set({ assumptionsOpen: open }),
 
   setActiveTab: (tab) => set({ activeTab: tab }),
+
+  setTourStep: (step) => set({ tourStep: step }),
+
+  setMaxSortieMin: (mins) => set({ maxSortieMin: mins }),
 }));

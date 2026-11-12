@@ -32,3 +32,4 @@
   > *"Now imagine space weather strikes: a Solar Particle Event erupts. With one click, the system models the 10x proton surge. The mission flips to NO-GO, the safe envelope shrinks to a 40-minute abort window, and the astronaut's visor switches to high-contrast EVA HUD mode—displaying glanceable bearing, walk-back countdown, and O2 margin at arm's length."*
   > 
   > *"Hyperlocal, multi-mission, safety-first. That's Marswalk Navigator."*
+
