@@ -86,6 +86,8 @@ export const App: React.FC = () => {
             layer_evidence: f.properties.layer_evidence || [],
             estimated_dwell_min: f.properties.estimated_dwell_min || 30,
             recommended_tools: f.properties.recommended_tools || [],
+            geologic_unit: f.properties.geologic_unit,
+            associated_cores: f.properties.associated_cores || [],
           }));
           setTargets(parsedTargets);
         }
@@ -112,10 +114,12 @@ export const App: React.FC = () => {
           setEnvelopeCoords(envelope.geometry.coordinates);
 
           // Default planned route: Base Alpha + Hawksbill Gap
-          if (parsedTargets.length >= 2) {
-            const initialWps = [parsedTargets[3], parsedTargets[0]];
-            addWaypoint(parsedTargets[3]);
-            addWaypoint(parsedTargets[0]);
+          const baseTarget = parsedTargets.find((t) => t.id === 'BASE-ALPHA') || parsedTargets[parsedTargets.length - 1];
+          const hawksbillTarget = parsedTargets.find((t) => t.id === 'SCI-01') || parsedTargets[0];
+          if (baseTarget && hawksbillTarget) {
+            const initialWps = [baseTarget, hawksbillTarget];
+            addWaypoint(baseTarget);
+            addWaypoint(hawksbillTarget);
             planCurrentWaypoints(meta, cGrid, sGrid, eGrid, initialWps);
           }
         }
@@ -219,6 +223,12 @@ export const App: React.FC = () => {
                   <div className="text-[11px] font-mono text-slate-400 space-y-1">
                     <div><span className="text-slate-500">Lon/Lat:</span> {selectedTarget.coordinates[0]}°E, {selectedTarget.coordinates[1]}°N</div>
                     <div><span className="text-slate-500">Dwell Time:</span> ~{selectedTarget.estimated_dwell_min} min</div>
+                    {selectedTarget.geologic_unit && (
+                      <div><span className="text-slate-500">USGS Unit:</span> <span className="text-purple-300">{selectedTarget.geologic_unit}</span></div>
+                    )}
+                    {selectedTarget.associated_cores && selectedTarget.associated_cores.length > 0 && (
+                      <div><span className="text-slate-500">M2020 Cores:</span> <span className="text-emerald-300">{selectedTarget.associated_cores.join(', ')}</span></div>
+                    )}
                   </div>
 
                   <div className="pt-2 flex gap-2">

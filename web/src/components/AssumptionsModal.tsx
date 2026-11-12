@@ -121,7 +121,7 @@ export const AssumptionsModal: React.FC = () => {
                 <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-800 mr-2">
                   REAL
                 </span>
-                <span className="text-slate-300">Measured NASA mission instrument data (HiRISE, MEDA, CRISM, Mastcam-Z)</span>
+                <span className="text-slate-300">Measured NASA mission instrument data (HiRISE, MEDA, CRISM, Mastcam-Z, USGS SIM 3464)</span>
               </div>
               <div className="p-2 rounded bg-slate-900 border border-slate-800">
                 <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-950 text-blue-400 border border-blue-800 mr-2">
@@ -142,6 +142,31 @@ export const AssumptionsModal: React.FC = () => {
                 <span className="text-slate-300">Offline cached fallback artifact when live endpoints are unreachable</span>
               </div>
             </div>
+          </div>
+
+          {/* Research Papers & NASA Citations */}
+          <div>
+            <h3 className="font-mono text-xs uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
+              <Database className="w-4 h-4 text-purple-400" />
+              4. Research Literature & NASA API Citations
+            </h3>
+            <ul className="space-y-1.5 text-[11px] font-mono text-slate-300 list-disc list-inside">
+              <li>
+                <strong>USGS SIM 3464:</strong> Sun, V.Z. & Stack, K.M. (2020). <em>Geologic map of Jezero crater and Nili Planum, Mars</em>. Scale 1:75,000. DOI: 10.3133/sim3464.
+              </li>
+              <li>
+                <strong>Igneous Floor & Delta Stratigraphy:</strong> Farley et al. (Science 2022) & Mangold et al. (Science 2021). Ground-truth rover rock core and delta beds analysis.
+              </li>
+              <li>
+                <strong>NASA SEXTANT Traverse Optimization:</strong> Carr et al. (NASA/TP-2015-218570). Metabolic cost, 1.5× safety margin, and Line-of-Sight comms models.
+              </li>
+              <li>
+                <strong>NASA Mars 2020 Raw Image API:</strong> Real-time REST API feed (`https://mars.nasa.gov/rss/api/?feed=raw_images&category=mars2020`).
+              </li>
+              <li>
+                <strong>NASA Mars Trek WMTS:</strong> OGC WMTS endpoints serving MRO HiRISE 25cm mosaic, MGS MOLA Shaded Relief, and Viking MDIM 2.1.
+              </li>
+            </ul>
           </div>
         </div>
 

@@ -30,11 +30,14 @@ export const LayerPanel: React.FC = () => {
 
   const categories = [
     { id: 'optical', name: 'Optical Basemap' },
+    { id: 'geology', name: 'Geology & Stratigraphy' },
     { id: 'topographic', name: 'Topography & Slope' },
     { id: 'thermal', name: 'Thermal & Rockiness' },
     { id: 'spectral', name: 'Spectral Mineralogy' },
     { id: 'hazard', name: 'Hazard Traversability' },
   ];
+
+  const activeCount = layers.filter((l) => !!layerVisibility[l.id]).length;
 
   return (
     <div className="w-80 bg-[#12141c]/95 border-r border-slate-800 flex flex-col h-full text-slate-200 select-none backdrop-blur z-20">
@@ -47,7 +50,7 @@ export const LayerPanel: React.FC = () => {
           </h2>
         </div>
         <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
-          ≥3 Required (6 Active)
+          ≥3 Required ({activeCount} Active)
         </span>
       </div>
 

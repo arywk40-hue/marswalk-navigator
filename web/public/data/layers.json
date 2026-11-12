@@ -25,6 +25,65 @@
       "defaultVisible": true
     },
     {
+      "id": "mola_color_wmts",
+      "label": "Mars Global MOLA Color Shaded Relief",
+      "type": "raster-tiles",
+      "category": "optical",
+      "url": "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/{z}/{y}/{x}.jpg",
+      "resolution_m": 463.0,
+      "source": "MGS MOLA Science Team (NASA / GSFC)",
+      "productId": "Mars_MGS_MOLA_ClrShade_merge_global_463m",
+      "date": "2003-05-01",
+      "link": "https://trek.nasa.gov/mars/",
+      "provenance": "real",
+      "legend": { "kind": "none", "stops": [] },
+      "defaultOpacity": 0.8,
+      "defaultVisible": false
+    },
+    {
+      "id": "viking_mdim21_wmts",
+      "label": "Viking MDIM 2.1 Color Global Mosaic",
+      "type": "raster-tiles",
+      "category": "optical",
+      "url": "https://trek.nasa.gov/tiles/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0//default/default028mm/{z}/{y}/{x}.jpg",
+      "resolution_m": 232.0,
+      "source": "Viking Orbiter / USGS Astrogeology",
+      "productId": "Mars_Viking_MDIM21_ClrMosaic_global_232m",
+      "date": "2001-01-01",
+      "link": "https://trek.nasa.gov/mars/",
+      "provenance": "real",
+      "legend": { "kind": "none", "stops": [] },
+      "defaultOpacity": 0.8,
+      "defaultVisible": false
+    },
+    {
+      "id": "usgs_geology_units",
+      "label": "USGS SIM 3464 Jezero Crater Geologic Units",
+      "type": "vector",
+      "category": "geology",
+      "url": "./data/geology_units.geojson",
+      "resolution_m": 15.0,
+      "source": "USGS Scientific Investigations Map 3464 (Sun & Stack, 2020)",
+      "productId": "USGS_SIM_3464_JEZERO",
+      "date": "2020-10-01",
+      "link": "https://doi.org/10.3133/sim3464",
+      "provenance": "real",
+      "legend": {
+        "kind": "categorical",
+        "title": "USGS Mapped Stratigraphic Units",
+        "stops": [
+          { "value": 1, "color": "#0284c7", "label": "Hf_delta_scarp (Delta Scarp Mudstone/Sandstone)" },
+          { "value": 2, "color": "#059669", "label": "Hf_delta_top (Delta Topset Fluvial Sandstone)" },
+          { "value": 3, "color": "#9333ea", "label": "Ndm (Delta Margin Carbonate Unit)" },
+          { "value": 4, "color": "#b45309", "label": "Ncf_f (Séítah Olivine Cumulate Basement)" },
+          { "value": 5, "color": "#78716c", "label": "Hcf_u (Máaz Basaltic Lava Floor)" },
+          { "value": 6, "color": "#475569", "label": "Ncr (Crater Rim Megabreccia)" }
+        ]
+      },
+      "defaultOpacity": 0.65,
+      "defaultVisible": false
+    },
+    {
       "id": "derived_slope",
       "label": "Derived Surface Slope (°)",
       "type": "raster-image",

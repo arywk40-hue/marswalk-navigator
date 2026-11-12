@@ -15,13 +15,25 @@ import GeoJSON from 'ol/format/GeoJSON';
 import { Style, Stroke, Fill, Text, Circle as CircleStyle } from 'ol/style';
 import { defaults as defaultControls, ScaleLine } from 'ol/control';
 import { useAppStore } from '../store/useAppStore';
-import { Target } from '../types';
-import { Crosshair, Compass, ZoomIn, ZoomOut } from 'lucide-react';
+import { Target, GeologicUnit } from '../types';
+import { Crosshair, Compass, ZoomIn, ZoomOut, X } from 'lucide-react';
 
 interface MapViewProps {
   envelopeCoords?: [number, number][][];
   showEnvelope?: boolean;
   showTraverse?: boolean;
+}
+
+function hexToRgba(hex: string, alpha: number): string {
+  let c = hex.replace('#', '');
+  if (c.length === 3) {
+    c = c.split('').map((x) => x + x).join('');
+  }
+  const num = parseInt(c, 16);
+  const r = (num >> 16) & 255;
+  const g = (num >> 8) & 255;
+  const b = num & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 export const MapView: React.FC<MapViewProps> = ({
@@ -33,6 +45,7 @@ export const MapView: React.FC<MapViewProps> = ({
   const mapRef = useRef<Map | null>(null);
   const tileLayersRef = useRef<Record<string, TileLayer<XYZ>>>({});
   const imageLayersRef = useRef<Record<string, ImageLayer<Static>>>({});
+  const vectorLayersRef = useRef<Record<string, VectorLayer<any>>>({});
   const vectorSourceRef = useRef<VectorSource>(new VectorSource());
   const routeSourceRef = useRef<VectorSource>(new VectorSource());
   const envelopeSourceRef = useRef<VectorSource>(new VectorSource());
@@ -50,6 +63,7 @@ export const MapView: React.FC<MapViewProps> = ({
   } = useAppStore();
 
   const [cursorCoord, setCursorCoord] = useState<{ lon: number; lat: number } | null>(null);
+  const [selectedGeology, setSelectedGeology] = useState<GeologicUnit | null>(null);
 
   const isHud = displayMode === 'hud';
   const aoiExtent = [77.40, 18.40, 77.48, 18.47]; // [lon_min, lat_min, lon_max, lat_max]
@@ -104,13 +118,42 @@ export const MapView: React.FC<MapViewProps> = ({
     });
 
     map.on('click', (evt) => {
-      const feature = map.forEachFeatureAtPixel(evt.pixel, (f) => f);
-      if (feature) {
-        const targetData = feature.get('targetData') as Target | undefined;
-        if (targetData) {
-          setSelectedTarget(targetData);
-          return;
+      let clickedTarget: Target | null = null;
+      let clickedGeology: GeologicUnit | null = null;
+
+      map.forEachFeatureAtPixel(evt.pixel, (f) => {
+        const targetData = f.get('targetData') as Target | undefined;
+        if (targetData && !clickedTarget) {
+          clickedTarget = targetData;
         }
+
+        const code = f.get('code');
+        const strat = f.get('stratigraphy');
+        if (code && strat && !clickedGeology) {
+          clickedGeology = {
+            code,
+            name: f.get('name') || code,
+            stratigraphy: strat,
+            age: f.get('age') || '',
+            lithology: f.get('lithology') || '',
+            mineralogy: f.get('mineralogy') || '',
+            biosignature_potential: f.get('biosignature_potential') || '',
+            rover_stops: f.get('rover_stops') || [],
+            drill_cores: f.get('drill_cores') || [],
+            color: f.get('color') || '#0284c7',
+          };
+        }
+      });
+
+      if (clickedTarget) {
+        setSelectedTarget(clickedTarget);
+        setSelectedGeology(null);
+        return;
+      }
+
+      if (clickedGeology) {
+        setSelectedGeology(clickedGeology);
+        return;
       }
 
       // If clicked on open terrain, create a custom survey stop
@@ -135,6 +178,7 @@ export const MapView: React.FC<MapViewProps> = ({
           };
           useAppStore.getState().setTargets([...currentTargets, customTarget]);
           useAppStore.getState().setSelectedTarget(customTarget);
+          setSelectedGeology(null);
         }
       }
     });
@@ -147,7 +191,7 @@ export const MapView: React.FC<MapViewProps> = ({
     };
   }, []);
 
-  // 2. Synchronize Layers (Tile and Static Overlay PNGs)
+  // 2. Synchronize Layers (Tile, Static Overlay PNGs, Vector GeoJSON)
   useEffect(() => {
     const map = mapRef.current;
     if (!map || layers.length === 0) return;
@@ -197,6 +241,45 @@ export const MapView: React.FC<MapViewProps> = ({
           olLayer.setVisible(isVisible);
           olLayer.setOpacity(opacity);
         }
+      } else if (layerDef.type === 'vector') {
+        let olLayer = vectorLayersRef.current[layerDef.id];
+        if (!olLayer) {
+          const vectorSource = new VectorSource({
+            url: layerDef.url,
+            format: new GeoJSON(),
+          });
+          olLayer = new VectorLayer({
+            source: vectorSource as any,
+            opacity,
+            visible: isVisible,
+            zIndex: idx + 25,
+            style: (feature) => {
+              const color = (feature.get('color') as string) || '#0284c7';
+              const code = (feature.get('code') as string) || '';
+              return new Style({
+                fill: new Fill({
+                  color: hexToRgba(color, 0.4),
+                }),
+                stroke: new Stroke({
+                  color: color,
+                  width: 2,
+                }),
+                text: new Text({
+                  text: code,
+                  font: 'bold 11px monospace',
+                  fill: new Fill({ color: '#ffffff' }),
+                  stroke: new Stroke({ color: '#000000', width: 3 }),
+                  overflow: true,
+                }),
+              });
+            },
+          });
+          vectorLayersRef.current[layerDef.id] = olLayer;
+          map.addLayer(olLayer);
+        } else {
+          olLayer.setVisible(isVisible);
+          olLayer.setOpacity(opacity);
+        }
       }
     });
   }, [layers, layerVisibility, layerOpacity]);
@@ -212,27 +295,30 @@ export const MapView: React.FC<MapViewProps> = ({
         targetData: target,
       });
 
-      const isBase = target.id.startsWith('BASE') || target.id.startsWith('HAB');
-      const isWaypoint = waypoints.some((w) => w.id === target.id);
-      const wpIndex = waypoints.findIndex((w) => w.id === target.id);
+      const isBase = target.id.startsWith('BASE');
+      const isSelected = waypoints.some((w) => w.id === target.id);
 
-      const color = isBase ? '#10b981' : isWaypoint ? '#00f0ff' : '#f59e0b';
+      const markerColor = isBase
+        ? '#38bdf8'
+        : isSelected
+        ? '#22c55e'
+        : '#eab308';
 
       feature.setStyle(
         new Style({
           image: new CircleStyle({
             radius: isBase ? 10 : 8,
-            fill: new Fill({ color: isHud ? '#000000' : color }),
+            fill: new Fill({ color: markerColor }),
             stroke: new Stroke({
-              color: isHud ? (isBase ? '#00ff66' : '#ffb000') : '#ffffff',
-              width: 2.5,
+              color: '#ffffff',
+              width: 2,
             }),
           }),
           text: new Text({
-            text: isWaypoint ? `${wpIndex + 1}` : target.name.split(' ')[0],
-            offsetY: isWaypoint ? 0 : -16,
-            font: isHud ? 'bold 12px monospace' : 'bold 11px sans-serif',
-            fill: new Fill({ color: isHud ? '#ffb000' : '#ffffff' }),
+            text: target.name.split(' ')[0],
+            font: 'bold 11px monospace',
+            offsetY: -16,
+            fill: new Fill({ color: isHud ? '#f59e0b' : '#ffffff' }),
             stroke: new Stroke({ color: '#000000', width: 3 }),
           }),
         })
@@ -248,52 +334,52 @@ export const MapView: React.FC<MapViewProps> = ({
     source.clear();
 
     if (plannedRoute && plannedRoute.coordinates.length > 1) {
-      const routeFeature = new Feature({
+      const lineFeature = new Feature({
         geometry: new LineString(plannedRoute.coordinates),
       });
 
-      routeFeature.setStyle(
+      lineFeature.setStyle(
         new Style({
           stroke: new Stroke({
-            color: isHud ? '#ffb000' : '#00f0ff',
+            color: isHud ? '#f59e0b' : '#38bdf8',
             width: isHud ? 4.5 : 3.5,
             lineDash: isHud ? [8, 4] : undefined,
           }),
         })
       );
 
-      source.addFeature(routeFeature);
+      source.addFeature(lineFeature);
     }
   }, [plannedRoute, isHud]);
 
-  // 5. Update Safe Return Envelope (Hero Feature)
+  // 5. Update Safe Return Envelope Polygon
   useEffect(() => {
     const source = envelopeSourceRef.current;
     source.clear();
 
     if (showEnvelope && envelopeCoords && envelopeCoords.length > 0) {
-      const envelopeFeature = new Feature({
+      const polyFeature = new Feature({
         geometry: new Polygon(envelopeCoords),
       });
 
-      envelopeFeature.setStyle(
+      polyFeature.setStyle(
         new Style({
-          fill: new Fill({
-            color: isHud ? 'rgba(255, 176, 0, 0.15)' : 'rgba(0, 240, 255, 0.18)',
-          }),
           stroke: new Stroke({
-            color: isHud ? '#ffb000' : '#00f0ff',
-            width: 2,
+            color: isHud ? 'rgba(239, 68, 68, 0.9)' : 'rgba(56, 189, 248, 0.8)',
+            width: 2.5,
             lineDash: [6, 6],
+          }),
+          fill: new Fill({
+            color: isHud ? 'rgba(239, 68, 68, 0.08)' : 'rgba(56, 189, 248, 0.1)',
           }),
         })
       );
 
-      source.addFeature(envelopeFeature);
+      source.addFeature(polyFeature);
     }
   }, [envelopeCoords, showEnvelope, isHud]);
 
-  // 6. Update Perseverance Real Traverse Benchmark
+  // 6. Update Perseverance Traverse Benchmark
   useEffect(() => {
     const source = traverseSourceRef.current;
     source.clear();
@@ -335,6 +421,66 @@ export const MapView: React.FC<MapViewProps> = ({
         <Compass className={`w-6 h-6 mb-1 ${isHud ? 'text-amber-400' : 'text-red-500'}`} />
         <span className="font-bold text-[10px]">N (000°)</span>
       </div>
+
+      {/* Geological Unit Inspector Card */}
+      {selectedGeology && (
+        <div className="absolute top-4 left-4 z-20 w-80 p-3.5 rounded-xl bg-slate-950/95 border border-slate-700/80 shadow-2xl backdrop-blur text-slate-200 font-mono space-y-2.5 animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-2">
+              <span
+                className="w-3.5 h-3.5 rounded-full shrink-0 border border-white/40"
+                style={{ backgroundColor: selectedGeology.color }}
+              />
+              <div>
+                <span className="text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-800 text-cyan-300">
+                  {selectedGeology.code}
+                </span>
+                <h4 className="text-xs font-bold text-white mt-0.5">
+                  {selectedGeology.name}
+                </h4>
+              </div>
+            </div>
+            <button
+              onClick={() => setSelectedGeology(null)}
+              className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-800 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="text-[11px] space-y-1.5 border-t border-slate-800/80 pt-2 text-slate-300 leading-snug">
+            <div>
+              <span className="text-slate-500 font-semibold mr-1.5">Stratigraphy:</span>
+              <span>{selectedGeology.stratigraphy}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 font-semibold mr-1.5">Age:</span>
+              <span className="text-amber-300">{selectedGeology.age}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 font-semibold mr-1.5">Lithology:</span>
+              <span>{selectedGeology.lithology}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 font-semibold mr-1.5">Mineralogy:</span>
+              <span className="text-emerald-300">{selectedGeology.mineralogy}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 font-semibold mr-1.5">Biosignature:</span>
+              <span className="text-purple-300 font-bold">{selectedGeology.biosignature_potential}</span>
+            </div>
+          </div>
+
+          {selectedGeology.drill_cores.length > 0 && (
+            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px]">
+              <span className="text-slate-500">M2020 Drill Cores:</span>
+              <span className="px-1.5 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 font-bold">
+                {selectedGeology.drill_cores.join(', ')}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Map Zoom Controls */}
       <div className="absolute bottom-16 right-4 z-10 flex flex-col gap-1.5">

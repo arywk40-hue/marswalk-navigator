@@ -16,7 +16,7 @@ export interface Layer {
   id: string;
   label: string;
   type: 'raster' | 'raster-tiles' | 'raster-image' | 'vector';
-  category: 'optical' | 'topographic' | 'thermal' | 'spectral' | 'hazard' | 'radiation' | 'weather';
+  category: 'optical' | 'topographic' | 'geology' | 'thermal' | 'spectral' | 'hazard' | 'radiation' | 'weather';
   url: string;
   fallbackUrl?: string;
   resolution_m: number;
@@ -54,6 +54,8 @@ export interface Target {
   layer_evidence: string[];
   estimated_dwell_min: number;
   recommended_tools: string[];
+  geologic_unit?: string;
+  associated_cores?: string[];
 }
 
 export interface ElevationPoint {
@@ -149,6 +151,32 @@ export interface POVImage {
   credit: string;
   heading_deg: number;
   caption: string;
+  nasa_id?: string;
+  geologic_context?: string;
+}
+
+export interface Mars2020RawImage {
+  id: string;
+  sol: number;
+  camera: string;
+  caption: string;
+  date_taken_utc: string;
+  url_medium: string;
+  url_full: string;
+  credit: string;
+}
+
+export interface GeologicUnit {
+  code: string;
+  name: string;
+  stratigraphy: string;
+  age: string;
+  lithology: string;
+  mineralogy: string;
+  biosignature_potential: string;
+  rover_stops: string[];
+  drill_cores: string[];
+  color: string;
 }
 
 export type DisplayMode = 'planning' | 'hud';

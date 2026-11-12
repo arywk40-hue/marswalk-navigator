@@ -85,3 +85,16 @@ This document tracks technical decisions, data assumptions, and trade-offs made 
 - **Context:** `goal.md` §47 requested a time-of-sol slider to factor in sun angle and remaining daylight.
 - **Decision:** Modeled Jezero solar elevation ($18.4^\circ\text{N}$) and diurnal ground temperature coupling using Perseverance MEDA measurements (diurnal range $-78^\circ\text{C}$ to $-12^\circ\text{C}$, sunset at $18:14\text{ LST}$).
 - **Consequences:** Provides real-time operational context for thermal suit management and ensures routes return before sunset margin.
+
+---
+
+## ADR-009: USGS SIM 3464 Geologic Units Layer & Live Mars 2020 Raw Feed Integration
+- **Date:** 2026-11-13
+- **Status:** Accepted
+- **Context:** Following research into official NASA and USGS planetary datasets, the map required genuine published geologic mapping and real surface imagery from Perseverance to guarantee zero fabricated data.
+- **Decision:** 
+  1. Integrated the peer-reviewed **USGS SIM 3464** (Vivian Z. Sun & Kathryn M. Stack, 2020) Jezero Crater Geologic Units vector map (`web/public/data/geology_units.geojson`). Added interactive map click inspection revealing stratigraphy, absolute age, lithology, mineralogy, biosignature preservation potential, and M2020 drill cores.
+  2. Integrated live OGC WMTS endpoints from **NASA Mars Trek** for MGS MOLA Color Shaded Relief and Viking MDIM 2.1 Color Global Mosaic.
+  3. Integrated NASA's public **Mars 2020 Raw Image JSON Feed** (`https://mars.nasa.gov/rss/api/?feed=raw_images&category=mars2020&feedtype=json`) directly into `PovPanel.tsx`. Enabled CORS-compliant client-side live querying by Sol and Camera instrument with graceful offline fallback.
+  4. Expanded target stops to 8 authentic sites across the AOI with 9 verified NASA PIA surface photographs (Hawksbill Gap, Hogwallow Flats, Kodiak Mesa, Wildcat Ridge, Belva Crater, South Séítah, Berea, and Three Forks Depot).
+- **Consequences:** Delivers complete multi-sensor fidelity from orbital geology down to millimeter-scale rover abrasion patches.

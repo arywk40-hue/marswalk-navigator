@@ -1,0 +1,348 @@
+{
+  "type": "FeatureCollection",
+  "citation": "USGS Scientific Investigations Map 3464 (Sun & Stack, 2020), Farley et al. (Science 2022)",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "GEO-01",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.428,
+              18.423
+            ],
+            [
+              77.442,
+              18.425
+            ],
+            [
+              77.456,
+              18.433
+            ],
+            [
+              77.452,
+              18.444
+            ],
+            [
+              77.438,
+              18.446
+            ],
+            [
+              77.432,
+              18.44
+            ],
+            [
+              77.426,
+              18.431
+            ],
+            [
+              77.428,
+              18.423
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "code": "Hf_delta_scarp",
+        "name": "Jezero Delta Scarp Mudstone/Sandstone Unit",
+        "stratigraphy": "Delta Bottomset & Foreset Beds",
+        "age": "Late Noachian to Early Hesperian (~3.7 Ga)",
+        "lithology": "Planar laminated smectite-rich mudstone, siltstone, and dipping foreset sandstone beds",
+        "mineralogy": "Fe/Mg smectites, phyllosilicates, minor carbonate",
+        "biosignature_potential": "HIGHEST (Organic matter preservation in fine clay matrix)",
+        "rover_stops": [
+          "Hawksbill Gap",
+          "Wildcat Ridge",
+          "Enchanted Lake"
+        ],
+        "drill_cores": [
+          "Swift Run",
+          "Skyland",
+          "Hazeltop"
+        ],
+        "color": "#0284c7",
+        "fill_opacity": 0.35,
+        "provenance": "real"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GEO-02",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.4,
+              18.435
+            ],
+            [
+              77.432,
+              18.44
+            ],
+            [
+              77.438,
+              18.446
+            ],
+            [
+              77.432,
+              18.465
+            ],
+            [
+              77.415,
+              18.47
+            ],
+            [
+              77.4,
+              18.47
+            ],
+            [
+              77.4,
+              18.435
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "code": "Hf_delta_top",
+        "name": "Delta Topset Fluvial Sandstone & Conglomerate Unit",
+        "stratigraphy": "Delta Topset Channel Facies",
+        "age": "Early Hesperian (~3.6 - 3.7 Ga)",
+        "lithology": "Cross-bedded lithic sandstone, pebble to boulder conglomerates from high-discharge fluvial floods",
+        "mineralogy": "Pyroxene, plagioclase feldspar, hydrated silica",
+        "biosignature_potential": "Moderate (High hydrodynamic energy, coarse clastics)",
+        "rover_stops": [
+          "Berea",
+          "Tenby",
+          "Otis Peak"
+        ],
+        "drill_cores": [
+          "Berea",
+          "Emerald Lake"
+        ],
+        "color": "#059669",
+        "fill_opacity": 0.35,
+        "provenance": "real"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GEO-03",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.448,
+              18.44
+            ],
+            [
+              77.468,
+              18.445
+            ],
+            [
+              77.472,
+              18.462
+            ],
+            [
+              77.452,
+              18.46
+            ],
+            [
+              77.438,
+              18.446
+            ],
+            [
+              77.448,
+              18.44
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "code": "Ndm",
+        "name": "Delta Margin Light-Toned Carbonate Unit",
+        "stratigraphy": "Marginal Lacustrine Carbonate Facies",
+        "age": "Late Noachian (~3.8 Ga)",
+        "lithology": "Magnesium carbonate-bearing light-toned bedrock, sulfate vein networks, silica-rich duricrust",
+        "mineralogy": "Magnesite (MgCO3), talc, hydrated silica",
+        "biosignature_potential": "VERY HIGH (Precipitated carbonates capable of capturing microbial textures/stromatolites)",
+        "rover_stops": [
+          "Hogwallow Flats",
+          "Amalik",
+          "Belva Inner Terrace"
+        ],
+        "drill_cores": [
+          "Bearwallow",
+          "Shulaps Range"
+        ],
+        "color": "#9333ea",
+        "fill_opacity": 0.35,
+        "provenance": "real"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GEO-04",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.43,
+              18.4
+            ],
+            [
+              77.48,
+              18.4
+            ],
+            [
+              77.48,
+              18.425
+            ],
+            [
+              77.456,
+              18.423
+            ],
+            [
+              77.442,
+              18.42
+            ],
+            [
+              77.43,
+              18.4
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "code": "Ncf_f",
+        "name": "Crater Floor Fractured Unit (S\u00e9\u00edtah Formation)",
+        "stratigraphy": "Igneous Layered Cumulate Basement",
+        "age": "Early Noachian (>3.82 Ga)",
+        "lithology": "Coarse-grained olivine cumulate / cumulate pyroxenite with aqueous alteration to carbonates and smectite",
+        "mineralogy": "Forsteritic Olivine (~65%), Augite, Carbonate, Magnetite",
+        "biosignature_potential": "Moderate-Low (Primary igneous cumulate, secondary hydrothermal serpentinization targets)",
+        "rover_stops": [
+          "South S\u00e9\u00edtah",
+          "Brac Ridge",
+          "Bastide"
+        ],
+        "drill_cores": [
+          "Montdenier",
+          "Salette"
+        ],
+        "color": "#b45309",
+        "fill_opacity": 0.35,
+        "provenance": "real"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GEO-05",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.442,
+              18.42
+            ],
+            [
+              77.48,
+              18.425
+            ],
+            [
+              77.48,
+              18.445
+            ],
+            [
+              77.456,
+              18.433
+            ],
+            [
+              77.442,
+              18.425
+            ],
+            [
+              77.442,
+              18.42
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "code": "Hcf_u",
+        "name": "Crater Floor Uniform Unit (M\u00e1az Formation)",
+        "stratigraphy": "Basaltic Lava Flow & Volcaniclastic Overburden",
+        "age": "Early Hesperian (~3.7 Ga)",
+        "lithology": "Aphanitic to porphyritic basaltic lava flows, pyroxene-feldspar volcanic rocks",
+        "mineralogy": "Pyroxene, Plagioclase, Hematite, Fe-oxides",
+        "biosignature_potential": "Low (Primary volcanic lava cooling crust)",
+        "rover_stops": [
+          "Three Forks Depot",
+          "Octavia E. Butler Landing Site",
+          "Roubion"
+        ],
+        "drill_cores": [
+          "Guillaumes",
+          "Bellegarde",
+          "Dourbes"
+        ],
+        "color": "#78716c",
+        "fill_opacity": 0.35,
+        "provenance": "real"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "GEO-06",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.4,
+              18.4
+            ],
+            [
+              77.43,
+              18.4
+            ],
+            [
+              77.428,
+              18.423
+            ],
+            [
+              77.4,
+              18.435
+            ],
+            [
+              77.4,
+              18.4
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "code": "Ncr",
+        "name": "Crater Rim Megabreccia & Wall Facies",
+        "stratigraphy": "Impact Basin Basement Breccia",
+        "age": "Middle Noachian (>3.9 Ga)",
+        "lithology": "Polymict impact breccia containing shattered crustal target rocks from Isidis basin impact",
+        "mineralogy": "Plagioclase, low-Ca pyroxene, chlorite",
+        "biosignature_potential": "Low (Impact thermal shock)",
+        "rover_stops": [
+          "Kodiak Southern Wall",
+          "Western Jezero Rim"
+        ],
+        "drill_cores": [],
+        "color": "#475569",
+        "fill_opacity": 0.35,
+        "provenance": "real"
+      }
+    }
+  ]
+}

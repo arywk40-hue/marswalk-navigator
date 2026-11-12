@@ -41,11 +41,12 @@ export const GuidedTourModal: React.FC<GuidedTourModalProps> = ({ onPlanRouteAct
     } else if (tourStep === 2) {
       // Move to Step 3: A* Route Planning
       clearWaypoints();
-      if (targets.length >= 3) {
-        addWaypoint(targets[3]); // Base Alpha
-        addWaypoint(targets[0]); // Hawksbill Gap
-        addWaypoint(targets[1]); // Hogwallow Carbonates
-      }
+      const baseAlpha = targets.find((t) => t.id === 'BASE-ALPHA') || targets[targets.length - 1];
+      const sci1 = targets.find((t) => t.id === 'SCI-01') || targets[0];
+      const sci2 = targets.find((t) => t.id === 'SCI-02') || targets[1];
+      addWaypoint(baseAlpha);
+      addWaypoint(sci1);
+      addWaypoint(sci2);
       if (onPlanRouteAction) onPlanRouteAction();
       setTourStep(3);
     } else if (tourStep === 3) {
@@ -86,7 +87,7 @@ export const GuidedTourModal: React.FC<GuidedTourModalProps> = ({ onPlanRouteAct
       title: 'Hyperlocal NASA Multi-Mission Fusion',
       icon: <Layers className="w-5 h-5 text-red-500" />,
       content:
-        'Marswalk Navigator combines 6 NASA data layers over Jezero Crater: 25cm HiRISE optical basemap, MOLA planetary elevation, 5m Horn slope, THEMIS thermal inertia, CRISM carbonate/clay mineralogy, and a synthesized hazard cost grid. Notice the transparent provenance tags (REAL, DERIVED, MODEL) on every layer.',
+        'Marswalk Navigator combines 9 authentic NASA & USGS data layers over Jezero Crater: 25cm HiRISE controlled orthomosaic, USGS SIM 3464 geologic units, MOLA color shaded relief, Viking MDIM 2.1, MOLA elevation, 5m Horn slope, THEMIS thermal inertia, CRISM carbonates/clays, and hazard cost grid. Notice the transparent provenance tags (REAL, DERIVED, MODEL) on every layer.',
     },
     {
       step: 2,

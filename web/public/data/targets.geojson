@@ -1,11 +1,15 @@
 {
   "type": "FeatureCollection",
+  "citation": "NASA Mars 2020 Mission Traverse Data & USGS SIM 3464",
   "features": [
     {
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [77.442, 18.438]
+        "coordinates": [
+          77.442,
+          18.438
+        ]
       },
       "properties": {
         "id": "SCI-01",
@@ -13,17 +17,33 @@
         "category": "Sedimentary Outcrop",
         "science_value": 5,
         "priority": "Critical",
-        "reason": "Exposed layered deltaic mudstone with high biosignature preservation potential.",
-        "layer_evidence": ["HiRISE 25cm Ortho", "HiRISE 1m DTM", "CRISM Smectite Clays"],
+        "reason": "Exposed finely layered deltaic mudstone showing progradation into ancient Lake Jezero.",
+        "layer_evidence": [
+          "HiRISE 25cm Ortho",
+          "Derived Slope 8\u00b0",
+          "CRISM Smectite Clays",
+          "USGS Hf_delta_scarp"
+        ],
         "estimated_dwell_min": 45,
-        "recommended_tools": ["Hand lens spectrometer", "Subsurface regolith core drill"]
+        "recommended_tools": [
+          "Hand lens spectrometer (SHERLOC)",
+          "Subsurface core drill"
+        ],
+        "geologic_unit": "Hf_delta_scarp (Delta Scarp Mudstone)",
+        "associated_cores": [
+          "Hazeltop",
+          "Bearwallow"
+        ]
       }
     },
     {
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [77.456, 18.448]
+        "coordinates": [
+          77.456,
+          18.448
+        ]
       },
       "properties": {
         "id": "SCI-02",
@@ -31,17 +51,32 @@
         "category": "Mineral Outcrop",
         "science_value": 5,
         "priority": "High",
-        "reason": "Orbital CRISM strong magnesium carbonate signature along the inner delta scarp.",
-        "layer_evidence": ["CRISM Carbonate Index", "THEMIS Thermal Inertia"],
+        "reason": "Orbital CRISM strong magnesium carbonate signature in fine-grained lacustrine margin unit.",
+        "layer_evidence": [
+          "CRISM Carbonate Index",
+          "THEMIS Thermal Inertia",
+          "USGS Ndm Margin Unit"
+        ],
         "estimated_dwell_min": 60,
-        "recommended_tools": ["Raman & Luminescence spectrometer", "Chipping hammer"]
+        "recommended_tools": [
+          "Raman & Luminescence spectrometer",
+          "Chipping hammer",
+          "Gas chromatograph"
+        ],
+        "geologic_unit": "Ndm (Delta Margin Carbonate)",
+        "associated_cores": [
+          "Shulaps Range"
+        ]
       }
     },
     {
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [77.428, 18.428]
+        "coordinates": [
+          77.428,
+          18.428
+        ]
       },
       "properties": {
         "id": "SCI-03",
@@ -49,30 +84,180 @@
         "category": "Geomorphology",
         "science_value": 4,
         "priority": "Medium",
-        "reason": "Truncated delta remnant showing bottomset-to-topset bedding transition.",
-        "layer_evidence": ["HiRISE 25cm Ortho", "Derived Slope 12°"],
-        "estimated_dwell_min": 30,
-        "recommended_tools": ["Panoramic multispectral camera", "Laser rangefinder"]
+        "reason": "Erosional delta remnant proving high-energy fluvial discharge and ancient lake level highstands.",
+        "layer_evidence": [
+          "HiRISE 25cm Ortho",
+          "Derived Slope 12\u00b0",
+          "MOLA DEM -2420m"
+        ],
+        "estimated_dwell_min": 35,
+        "recommended_tools": [
+          "Panoramic multispectral camera",
+          "Laser rangefinder"
+        ],
+        "geologic_unit": "Hf_delta_scarp (Delta Remnant Outlier)",
+        "associated_cores": []
       }
     },
     {
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [77.435, 18.420]
+        "coordinates": [
+          77.448,
+          18.441
+        ]
+      },
+      "properties": {
+        "id": "SCI-04",
+        "name": "Wildcat Ridge Organic Mudstone",
+        "category": "Astrobiology Target",
+        "science_value": 5,
+        "priority": "Critical",
+        "reason": "SHERLOC detected aromatic organic molecules correlated with sulfate and clay minerals.",
+        "layer_evidence": [
+          "CRISM Phyllosilicates",
+          "USGS Hf_delta_scarp",
+          "Mastcam-Z Multispectral"
+        ],
+        "estimated_dwell_min": 50,
+        "recommended_tools": [
+          "UV Raman spectrometer",
+          "Contact sensor arm",
+          "Ultra-clean core sample tube"
+        ],
+        "geologic_unit": "Hf_delta_scarp (Delta Bottomset)",
+        "associated_cores": [
+          "Swift Run",
+          "Skyland"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.42,
+          18.455
+        ]
+      },
+      "properties": {
+        "id": "SCI-05",
+        "name": "Belva Impact Crater Wall",
+        "category": "Structural Geology",
+        "science_value": 4,
+        "priority": "High",
+        "reason": "1 km impact crater excavating deep delta cross-bedding and boulder conglomerate layers.",
+        "layer_evidence": [
+          "HiRISE 25cm Ortho",
+          "Horn Slope > 15\u00b0 (Crater Wall)",
+          "USGS Hf_delta_top"
+        ],
+        "estimated_dwell_min": 40,
+        "recommended_tools": [
+          "Long-range telephoto imager",
+          "Rock hammer",
+          "Thermal IR sensor"
+        ],
+        "geologic_unit": "Hf_delta_top (Excavated Topset)",
+        "associated_cores": []
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.445,
+          18.41
+        ]
+      },
+      "properties": {
+        "id": "SCI-06",
+        "name": "South S\u00e9\u00edtah Olivine Cumulate",
+        "category": "Igneous Petrology",
+        "science_value": 4,
+        "priority": "Medium",
+        "reason": "Layered igneous cumulate basement providing absolute radiometric age of Jezero impact basin.",
+        "layer_evidence": [
+          "THEMIS High Inertia",
+          "CRISM Olivine Band",
+          "USGS Ncf_f"
+        ],
+        "estimated_dwell_min": 45,
+        "recommended_tools": [
+          "X-ray fluorescence (PIXL)",
+          "Alpha particle X-ray spectrometer"
+        ],
+        "geologic_unit": "Ncf_f (S\u00e9\u00edtah Olivine Cumulate)",
+        "associated_cores": [
+          "Montdenier",
+          "Salette"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.432,
+          18.449
+        ]
+      },
+      "properties": {
+        "id": "SCI-07",
+        "name": "Berea Upper Fan Sandstone",
+        "category": "Sedimentary Facies",
+        "science_value": 4,
+        "priority": "High",
+        "reason": "Carbonate-cemented fluvial delta topset sandstone rich in hydrated silica.",
+        "layer_evidence": [
+          "USGS Hf_delta_top",
+          "CRISM Hydrated Silica",
+          "HiRISE Ortho"
+        ],
+        "estimated_dwell_min": 35,
+        "recommended_tools": [
+          "Abrasion drill bit",
+          "Multispectral hand lens"
+        ],
+        "geologic_unit": "Hf_delta_top (Upper Delta Fan)",
+        "associated_cores": [
+          "Berea"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.435,
+          18.42
+        ]
       },
       "properties": {
         "id": "BASE-ALPHA",
-        "name": "Surface Habitat Alpha (Lander Staging)",
+        "name": "Surface Habitat Alpha (Three Forks Staging)",
         "category": "Habitat & Shelter",
         "science_value": 0,
         "priority": "Base",
         "reason": "Primary pressurized habitat, suit recharging station, and SPE storm shelter.",
-        "layer_evidence": ["Hazard Cost 1.0", "Slope < 2°"],
+        "layer_evidence": [
+          "Hazard Cost 1.0",
+          "Slope < 2\u00b0",
+          "MOLA DEM -2500m",
+          "USGS Hcf_u (Smooth Basalt Floor)"
+        ],
         "estimated_dwell_min": 0,
-        "recommended_tools": []
+        "recommended_tools": [],
+        "geologic_unit": "Hcf_u (M\u00e1az Basaltic Floor)",
+        "associated_cores": [
+          "Depot tube backup"
+        ]
       }
     }
   ]
 }
-
