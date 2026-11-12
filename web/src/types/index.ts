@@ -15,7 +15,7 @@ export interface Legend {
 export interface Layer {
   id: string;
   label: string;
-  type: 'raster' | 'raster-tiles' | 'vector';
+  type: 'raster' | 'raster-tiles' | 'raster-image' | 'vector';
   category: 'optical' | 'topographic' | 'thermal' | 'spectral' | 'hazard' | 'radiation' | 'weather';
   url: string;
   fallbackUrl?: string;
@@ -150,3 +150,4 @@ export interface POVImage {
 }
 
 export type DisplayMode = 'planning' | 'hud';
+

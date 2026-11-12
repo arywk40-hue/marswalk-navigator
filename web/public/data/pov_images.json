@@ -1,0 +1,50 @@
+[
+  {
+    "id": "POV-01",
+    "targetId": "SCI-01",
+    "title": "Hawksbill Gap Delta Scarp Fine Bedding",
+    "camera": "Mastcam-Z Right Eye (110mm Zoom)",
+    "sol": 482,
+    "imageUrl": "https://images-assets.nasa.gov/image/PIA25328/PIA25328~orig.jpg",
+    "thumbUrl": "https://images-assets.nasa.gov/image/PIA25328/PIA25328~thumb.jpg",
+    "heading_deg": 285,
+    "caption": "Finely layered sedimentary mudstones showing deltaic progradation into ancient Lake Jezero.",
+    "credit": "NASA/JPL-Caltech/ASU/MSSS"
+  },
+  {
+    "id": "POV-02",
+    "targetId": "SCI-02",
+    "title": "Hogwallow Flats Carbonate Core Site",
+    "camera": "SuperCam RMI & Mastcam-Z",
+    "sol": 620,
+    "imageUrl": "https://images-assets.nasa.gov/image/PIA25688/PIA25688~orig.jpg",
+    "thumbUrl": "https://images-assets.nasa.gov/image/PIA25688/PIA25688~thumb.jpg",
+    "heading_deg": 45,
+    "caption": "Abrasion patch revealing fine-grained carbonate and sulfate veins in delta margin unit.",
+    "credit": "NASA/JPL-Caltech/LANL/CNES/IRAP"
+  },
+  {
+    "id": "POV-03",
+    "targetId": "SCI-03",
+    "title": "Kodiak Butte Isolated Delta Outlier",
+    "camera": "Mastcam-Z Telephoto",
+    "sol": 215,
+    "imageUrl": "https://images-assets.nasa.gov/image/PIA24838/PIA24838~orig.jpg",
+    "thumbUrl": "https://images-assets.nasa.gov/image/PIA24838/PIA24838~thumb.jpg",
+    "heading_deg": 195,
+    "caption": "Distinct dip-angles in bottomset to foreset beds proving high-energy ancient fluvial discharge.",
+    "credit": "NASA/JPL-Caltech/ASU"
+  },
+  {
+    "id": "POV-BASE",
+    "targetId": "BASE-ALPHA",
+    "title": "Three Forks Flat Terrain Staging Area",
+    "camera": "Navcam Left Panoramic View",
+    "sol": 655,
+    "imageUrl": "https://images-assets.nasa.gov/image/PIA25732/PIA25732~orig.jpg",
+    "thumbUrl": "https://images-assets.nasa.gov/image/PIA25732/PIA25732~thumb.jpg",
+    "heading_deg": 350,
+    "caption": "Flat, low-rock-abundance workspace designated for sample depot staging and EVA egress.",
+    "credit": "NASA/JPL-Caltech"
+  }
+]

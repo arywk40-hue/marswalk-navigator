@@ -2,24 +2,41 @@ import React, { useEffect, useRef, useState } from 'react';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
+import ImageLayer from 'ol/layer/Image';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import XYZ from 'ol/source/XYZ';
+import Static from 'ol/source/ImageStatic';
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
 import LineString from 'ol/geom/LineString';
+import Polygon from 'ol/geom/Polygon';
+import GeoJSON from 'ol/format/GeoJSON';
 import { Style, Stroke, Fill, Text, Circle as CircleStyle } from 'ol/style';
 import { defaults as defaultControls, ScaleLine } from 'ol/control';
 import { useAppStore } from '../store/useAppStore';
 import { Target } from '../types';
 import { Crosshair, Compass, ZoomIn, ZoomOut } from 'lucide-react';
 
-export const MapView: React.FC = () => {
+interface MapViewProps {
+  envelopeCoords?: [number, number][][];
+  showEnvelope?: boolean;
+  showTraverse?: boolean;
+}
+
+export const MapView: React.FC<MapViewProps> = ({
+  envelopeCoords,
+  showEnvelope = true,
+  showTraverse = false,
+}) => {
   const mapElement = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
   const tileLayersRef = useRef<Record<string, TileLayer<XYZ>>>({});
+  const imageLayersRef = useRef<Record<string, ImageLayer<Static>>>({});
   const vectorSourceRef = useRef<VectorSource>(new VectorSource());
   const routeSourceRef = useRef<VectorSource>(new VectorSource());
+  const envelopeSourceRef = useRef<VectorSource>(new VectorSource());
+  const traverseSourceRef = useRef<VectorSource>(new VectorSource());
 
   const {
     layers,
@@ -35,14 +52,20 @@ export const MapView: React.FC = () => {
   const [cursorCoord, setCursorCoord] = useState<{ lon: number; lat: number } | null>(null);
 
   const isHud = displayMode === 'hud';
+  const aoiExtent = [77.40, 18.40, 77.48, 18.47]; // [lon_min, lat_min, lon_max, lat_max]
 
-  // 1. Initialize Map
+  // 1. Initialize OpenLayers Map in Mars Equirectangular Projection (EPSG:4326)
   useEffect(() => {
     if (!mapElement.current || mapRef.current) return;
 
-    const vectorLayer = new VectorLayer({
-      source: vectorSourceRef.current,
-      zIndex: 100,
+    const envelopeLayer = new VectorLayer({
+      source: envelopeSourceRef.current,
+      zIndex: 80,
+    });
+
+    const traverseLayer = new VectorLayer({
+      source: traverseSourceRef.current,
+      zIndex: 85,
     });
 
     const routeLayer = new VectorLayer({
@@ -50,14 +73,19 @@ export const MapView: React.FC = () => {
       zIndex: 90,
     });
 
+    const vectorLayer = new VectorLayer({
+      source: vectorSourceRef.current,
+      zIndex: 100,
+    });
+
     const map = new Map({
       target: mapElement.current,
-      layers: [routeLayer, vectorLayer],
+      layers: [envelopeLayer, traverseLayer, routeLayer, vectorLayer],
       view: new View({
-        projection: 'EPSG:4326', // Equirectangular (lon/lat in degrees)
+        projection: 'EPSG:4326', // Equirectangular (lon/lat degrees)
         center: [77.44, 18.435], // Jezero Crater Delta Front center
         zoom: 13.5,
-        minZoom: 10,
+        minZoom: 11,
         maxZoom: 18,
       }),
       controls: defaultControls({ attribution: false, zoom: false, rotate: false }).extend([
@@ -93,35 +121,56 @@ export const MapView: React.FC = () => {
     };
   }, []);
 
-  // 2. Synchronize Tile Layers with Manifest & Visibility
+  // 2. Synchronize Layers (Tile and Static Overlay PNGs)
   useEffect(() => {
     const map = mapRef.current;
     if (!map || layers.length === 0) return;
 
     layers.forEach((layerDef, idx) => {
-      let olLayer = tileLayersRef.current[layerDef.id];
+      const isVisible = !!layerVisibility[layerDef.id];
+      const opacity = layerOpacity[layerDef.id] ?? layerDef.defaultOpacity;
 
-      if (!olLayer) {
-        // Create XYZ tile source using Mars Trek or fallback
-        const source = new XYZ({
-          projection: 'EPSG:4326',
-          url: layerDef.url,
-          crossOrigin: 'anonymous',
-          maxZoom: 18,
-        });
-
-        olLayer = new TileLayer({
-          source,
-          opacity: layerOpacity[layerDef.id] ?? layerDef.defaultOpacity,
-          visible: !!layerVisibility[layerDef.id],
-          zIndex: idx + 1,
-        });
-
-        tileLayersRef.current[layerDef.id] = olLayer;
-        map.addLayer(olLayer);
-      } else {
-        olLayer.setVisible(!!layerVisibility[layerDef.id]);
-        olLayer.setOpacity(layerOpacity[layerDef.id] ?? layerDef.defaultOpacity);
+      if (layerDef.type === 'raster-tiles') {
+        let olLayer = tileLayersRef.current[layerDef.id];
+        if (!olLayer) {
+          const source = new XYZ({
+            projection: 'EPSG:4326',
+            url: layerDef.url,
+            crossOrigin: 'anonymous',
+            maxZoom: 18,
+          });
+          olLayer = new TileLayer({
+            source,
+            opacity,
+            visible: isVisible,
+            zIndex: idx + 1,
+          });
+          tileLayersRef.current[layerDef.id] = olLayer;
+          map.addLayer(olLayer);
+        } else {
+          olLayer.setVisible(isVisible);
+          olLayer.setOpacity(opacity);
+        }
+      } else if (layerDef.type === 'raster-image' || layerDef.type === 'raster') {
+        let olLayer = imageLayersRef.current[layerDef.id];
+        if (!olLayer) {
+          const source = new Static({
+            url: layerDef.url,
+            imageExtent: aoiExtent,
+            projection: 'EPSG:4326',
+          });
+          olLayer = new ImageLayer({
+            source,
+            opacity,
+            visible: isVisible,
+            zIndex: idx + 10,
+          });
+          imageLayersRef.current[layerDef.id] = olLayer;
+          map.addLayer(olLayer);
+        } else {
+          olLayer.setVisible(isVisible);
+          olLayer.setOpacity(opacity);
+        }
       }
     });
   }, [layers, layerVisibility, layerOpacity]);
@@ -167,7 +216,7 @@ export const MapView: React.FC = () => {
     });
   }, [targets, waypoints, isHud]);
 
-  // 4. Update Planned Route Vector Layer
+  // 4. Update Planned Route Polyline
   useEffect(() => {
     const source = routeSourceRef.current;
     source.clear();
@@ -181,7 +230,7 @@ export const MapView: React.FC = () => {
         new Style({
           stroke: new Stroke({
             color: isHud ? '#ffb000' : '#00f0ff',
-            width: isHud ? 4 : 3,
+            width: isHud ? 4.5 : 3.5,
             lineDash: isHud ? [8, 4] : undefined,
           }),
         })
@@ -190,6 +239,60 @@ export const MapView: React.FC = () => {
       source.addFeature(routeFeature);
     }
   }, [plannedRoute, isHud]);
+
+  // 5. Update Safe Return Envelope (Hero Feature)
+  useEffect(() => {
+    const source = envelopeSourceRef.current;
+    source.clear();
+
+    if (showEnvelope && envelopeCoords && envelopeCoords.length > 0) {
+      const envelopeFeature = new Feature({
+        geometry: new Polygon(envelopeCoords),
+      });
+
+      envelopeFeature.setStyle(
+        new Style({
+          fill: new Fill({
+            color: isHud ? 'rgba(255, 176, 0, 0.15)' : 'rgba(0, 240, 255, 0.18)',
+          }),
+          stroke: new Stroke({
+            color: isHud ? '#ffb000' : '#00f0ff',
+            width: 2,
+            lineDash: [6, 6],
+          }),
+        })
+      );
+
+      source.addFeature(envelopeFeature);
+    }
+  }, [envelopeCoords, showEnvelope, isHud]);
+
+  // 6. Update Perseverance Real Traverse Benchmark
+  useEffect(() => {
+    const source = traverseSourceRef.current;
+    source.clear();
+
+    if (showTraverse) {
+      fetch('./data/perseverance_traverse.geojson')
+        .then((res) => res.json())
+        .then((data) => {
+          const features = new GeoJSON().readFeatures(data);
+          features.forEach((f) => {
+            f.setStyle(
+              new Style({
+                stroke: new Stroke({
+                  color: '#eab308', // Amber dashed for real rover track
+                  width: 2.5,
+                  lineDash: [4, 4],
+                }),
+              })
+            );
+          });
+          source.addFeatures(features);
+        })
+        .catch((e) => console.error('Failed to load traverse:', e));
+    }
+  }, [showTraverse]);
 
   return (
     <div className="relative flex-1 h-full w-full bg-[#0a0b0e] overflow-hidden">

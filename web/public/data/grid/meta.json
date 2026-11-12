@@ -1,0 +1,16 @@
+{
+  "width": 900,
+  "height": 830,
+  "cell_size_m": 5.0,
+  "bbox": [
+    77.4,
+    18.4,
+    77.48,
+    18.47
+  ],
+  "crs": "IAU2000:49900 (Mars 2000 Sphere)",
+  "elevation_min_m": -2681.539794921875,
+  "elevation_max_m": -2230.27685546875,
+  "hard_slope_deg": 15.0,
+  "caution_slope_deg": 10.0
+}

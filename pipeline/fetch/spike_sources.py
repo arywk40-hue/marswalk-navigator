@@ -43,3 +43,4 @@ for url, desc in endpoints:
 print("\n=== SUMMARY OF SPIKE RESULTS ===")
 for desc, ok in results.items():
     print(f"[{'OK' if ok else 'FAIL'}] {desc}")
+

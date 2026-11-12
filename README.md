@@ -97,3 +97,4 @@ In compliance with the project's verification principles, every layer and metric
 - <span style="color:#a855f7">**SAMPLE:**</span> Verified offline cached backups for resilient hackathon judging.
 
 Detailed documentation is available in [docs/data-sources.md](docs/data-sources.md) and [docs/assumptions.md](docs/assumptions.md).
+

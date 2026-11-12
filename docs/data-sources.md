@@ -23,3 +23,4 @@ This document tracks all NASA missions, instruments, product IDs, and live verif
 1. No unverified URLs: Every endpoint has been probed by automated spike script (`pipeline/fetch/spike_sources.py`).
 2. Where an endpoint suffers latency or downtime, offline pre-cached assets are loaded and explicitly tagged with `provenance: "sample"` in `layers.json`.
 3. Clear attribution is provided to NASA, JPL-Caltech, USGS Astrogeology Science Center, University of Arizona, and Johns Hopkins University Applied Physics Laboratory (JHU-APL).
+

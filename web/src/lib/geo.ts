@@ -106,3 +106,4 @@ export function formatDuration(minutes: number): string {
   const mins = Math.round(minutes % 60);
   return `${hrs}h ${mins.toString().padStart(2, '0')}m`;
 }
+

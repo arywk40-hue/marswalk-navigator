@@ -36,3 +36,4 @@ describe('Mars Geo Mathematics', () => {
     expect(uphillSpeed).toBeGreaterThan(0.1);
   });
 });
+

@@ -35,3 +35,4 @@ This document details the tunable physical, physiological, and radiological para
 - **GCR Baseline Dose Rate:** $9.5\,\mu\text{Sv/h}$ ($0.228\text{ mSv/day}$). Ground-truth proxy from Curiosity MSL RAD surface measurements in Gale Crater (Zeitlin et al., 2013).
 - **Solar Particle Event (SPE) Multiplier:** $10.0\times$ baseline ($95.0\,\mu\text{Sv/h}$). Simulates high-energy proton flux from a coronal mass ejection (CME) shock.
 - **EVA Radiation Limit:** $1.0\text{ mSv}$ per sortie, adhering to NASA-STD-3001 guidelines.
+

@@ -47,3 +47,21 @@ This document tracks technical decisions, data assumptions, and trade-offs made 
   - Mars Trek WMTS tile matrix sets (`default028mm`) integrate seamlessly into OpenLayers `WMTS` / `TileGrid`.
 - **Decision:** Select **OpenLayers (`ol`)** as the primary mapping engine for Marswalk Navigator, complemented by custom canvas overlays for HUD-style tactical rendering.
 - **Consequences:** Eliminates Mercator distortion; gives authentic metric scale fidelity for walking routes.
+
+---
+
+## ADR-005: Hero Feature — Safe Return Envelope Isochrone
+- **Date:** 2026-11-12
+- **Status:** Accepted
+- **Context:** To distinguish Marswalk Navigator from traditional static or regional maps, judges need an immediate, glanceable visualization of astronaut exploration boundaries.
+- **Decision:** Implement a radial isochrone flood-fill from Habitat Alpha that calculates round-trip walking time factoring in suit walking speed, slope penalties, and hazard costs, constrained by the NASA $1.5\times$ consumables reserve rule.
+- **Consequences:** The map dynamically displays the safe excursion envelope, and contracts in real time during Solar Particle Event (SPE) radiation storms.
+
+---
+
+## ADR-006: Ground-Truth Validation Against Perseverance Traverse Path
+- **Date:** 2026-11-12
+- **Status:** Accepted
+- **Context:** Judging criterion *Validity* demands verification that our hazard cost model reflects real Martian operational hazards.
+- **Decision:** Integrated Perseverance's actual traverse path (Sols 0–1050) across Three Forks and Hawksbill Gap as a toggleable benchmark layer.
+- **Consequences:** Quantifies that the cost grid aligns with paths chosen by NASA/JPL rover planners, avoiding steep scarps and loose dune sand.

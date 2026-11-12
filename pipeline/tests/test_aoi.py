@@ -42,3 +42,4 @@ def test_suit_and_hazard_limits():
     assert limits["hard_slope_deg"] == 15.0
     assert limits["caution_slope_deg"] == 10.0
     assert limits["hazard_buffer_m"] > 0
+

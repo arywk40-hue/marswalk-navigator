@@ -8,3 +8,4 @@ export default defineConfig({
   },
   base: './', // for static hosting on GitHub Pages / Vercel
 });
+
