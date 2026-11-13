@@ -54,20 +54,32 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
   } = useAppStore();
 
   const [backendOnline, setBackendOnline] = React.useState<boolean>(false);
+  const [activeBackendUrl, setActiveBackendUrl] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     let mounted = true;
     const checkBackend = async () => {
-      try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
-        const res = await fetch(`${backendUrl}/health`, { signal: AbortSignal.timeout(1000) });
-        if (mounted) {
-          setBackendOnline(res.ok);
+      const candidates = [
+        import.meta.env.VITE_BACKEND_URL,
+        window.location.protocol === 'https:' ? null : 'http://localhost:8000',
+        'https://delicious-congressional-pci-airline.trycloudflare.com',
+      ].filter(Boolean) as string[];
+
+      for (const url of candidates) {
+        try {
+          const res = await fetch(`${url}/health`, { signal: AbortSignal.timeout(1500) });
+          if (res.ok && mounted) {
+            setBackendOnline(true);
+            setActiveBackendUrl(url);
+            return;
+          }
+        } catch {
+          // try next
         }
-      } catch {
-        if (mounted) {
-          setBackendOnline(false);
-        }
+      }
+      if (mounted) {
+        setBackendOnline(false);
+        setActiveBackendUrl(null);
       }
     };
     checkBackend();
@@ -87,8 +99,8 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
     setIsPlanning(true);
 
     // Try Python Backend API first
+    const backendUrl = activeBackendUrl || 'http://localhost:8000';
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
       const routeRes = await fetch(`${backendUrl}/api/route`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,7 +113,7 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
           mobility_mode: currentMode,
           max_slope_deg: 20.0,
         }),
-        signal: AbortSignal.timeout(2500),
+        signal: AbortSignal.timeout(3000),
       });
 
       if (routeRes.ok) {
@@ -118,7 +130,7 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
             reserve_factor: 1.5,
             mobility_mode: currentMode,
           }),
-          signal: AbortSignal.timeout(1500),
+          signal: AbortSignal.timeout(2000),
         });
 
         if (envRes.ok) {
@@ -164,7 +176,7 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
     if (gridMeta && costGrid && slopeGrid && waypoints.length > 0) {
       if (backendOnline) {
         try {
-          const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+          const backendUrl = activeBackendUrl || 'http://localhost:8000';
           const envRes = await fetch(`${backendUrl}/api/envelope`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -174,7 +186,7 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
               reserve_factor: 1.5,
               mobility_mode: mobilityMode,
             }),
-            signal: AbortSignal.timeout(1000),
+            signal: AbortSignal.timeout(1500),
           });
           if (envRes.ok) {
             const envData = await envRes.json();
@@ -264,9 +276,9 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
       <div className="px-3.5 py-1.5 bg-slate-950/60 border-b border-slate-800/60 flex items-center justify-between text-[10px] font-mono">
         <span className="text-slate-400">Compute Backend:</span>
         {backendOnline ? (
-          <span className="inline-flex items-center gap-1.5 text-emerald-400 font-semibold" title="Python FastAPI REST Engine (Port 8000)">
+          <span className="inline-flex items-center gap-1.5 text-emerald-400 font-semibold" title={`Connected to ${activeBackendUrl}`}>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            Python API (Port 8000)
+            {activeBackendUrl?.includes('trycloudflare') ? 'Cloud API (Live)' : 'Local API (Port 8000)'}
           </span>
         ) : (
           <span className="inline-flex items-center gap-1.5 text-slate-400" title="Offline Client-Side Engine Active">
