@@ -57,3 +57,4 @@
 - **Slide 5 (Suit-Aware A* & SEXTANT):** Slope cutoff, RF line-of-sight, rover vs. foot mobility.
 - **Slide 6 (Ground-Truth & Validation):** Perseverance traverse benchmark + Live Mars 2020 raw image feed.
 - **Slide 7 (Field Usability):** Habitat Planning vs. Helmet HUD Visor mode + Cuff Cue Card.
+

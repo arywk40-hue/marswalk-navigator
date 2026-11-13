@@ -16,7 +16,17 @@ import { Style, Stroke, Fill, Text, Circle as CircleStyle } from 'ol/style';
 import { defaults as defaultControls, ScaleLine } from 'ol/control';
 import { useAppStore } from '../store/useAppStore';
 import { Target, GeologicUnit } from '../types';
-import { Crosshair, Compass, ZoomIn, ZoomOut, X } from 'lucide-react';
+import {
+  Crosshair,
+  Compass,
+  ZoomIn,
+  ZoomOut,
+  X,
+  Target as TargetIcon,
+  Layers,
+  Sun,
+  Radio,
+} from 'lucide-react';
 
 interface MapViewProps {
   envelopeCoords?: [number, number][][];
@@ -55,11 +65,13 @@ export const MapView: React.FC<MapViewProps> = ({
     layers,
     layerVisibility,
     layerOpacity,
+    toggleLayer,
     targets,
     waypoints,
     plannedRoute,
     displayMode,
     setSelectedTarget,
+    timeOfSol,
   } = useAppStore();
 
   const [cursorCoord, setCursorCoord] = useState<{ lon: number; lat: number } | null>(null);
@@ -67,6 +79,11 @@ export const MapView: React.FC<MapViewProps> = ({
 
   const isHud = displayMode === 'hud';
   const aoiExtent = [77.40, 18.40, 77.48, 18.47]; // [lon_min, lat_min, lon_max, lat_max]
+
+  // Solar calculation from timeOfSol
+  const hoursSinceNoon = Math.abs(timeOfSol - 12.0);
+  const sunElevationDeg = Math.max(0, Math.round(65.0 - hoursSinceNoon * 11.2));
+  const sunAzimuthDeg = Math.round(90 + (timeOfSol / 24) * 240);
 
   // 1. Initialize OpenLayers Map in Mars Equirectangular Projection (EPSG:4326)
   useEffect(() => {
@@ -166,8 +183,8 @@ export const MapView: React.FC<MapViewProps> = ({
           const currentTargets = useAppStore.getState().targets;
           const customTarget: Target = {
             id: `CUSTOM-${Date.now()}`,
-            name: `Field Survey Point ${currentTargets.length}`,
-            category: 'Field Observation',
+            name: `Field Survey Stop ${currentTargets.length}`,
+            category: 'In-Situ Field Choice',
             coordinates: [lon, lat],
             science_value: 4,
             priority: 'Opportunity',
@@ -307,7 +324,7 @@ export const MapView: React.FC<MapViewProps> = ({
       feature.setStyle(
         new Style({
           image: new CircleStyle({
-            radius: isBase ? 10 : 8,
+            radius: isBase ? 11 : 8.5,
             fill: new Fill({ color: markerColor }),
             stroke: new Stroke({
               color: '#ffffff',
@@ -365,12 +382,12 @@ export const MapView: React.FC<MapViewProps> = ({
       polyFeature.setStyle(
         new Style({
           stroke: new Stroke({
-            color: isHud ? 'rgba(239, 68, 68, 0.9)' : 'rgba(56, 189, 248, 0.8)',
+            color: isHud ? 'rgba(239, 68, 68, 0.9)' : 'rgba(56, 189, 248, 0.85)',
             width: 2.5,
             lineDash: [6, 6],
           }),
           fill: new Fill({
-            color: isHud ? 'rgba(239, 68, 68, 0.08)' : 'rgba(56, 189, 248, 0.1)',
+            color: isHud ? 'rgba(239, 68, 68, 0.1)' : 'rgba(56, 189, 248, 0.12)',
           }),
         })
       );
@@ -406,49 +423,108 @@ export const MapView: React.FC<MapViewProps> = ({
     }
   }, [showTraverse]);
 
+  const handleCenterHabitat = () => {
+    const view = mapRef.current?.getView();
+    view?.animate({
+      center: [77.44, 18.435],
+      zoom: 13.5,
+      duration: 600,
+    });
+  };
+
+  const isGeologyActive = !!layerVisibility['usgs_geology_units'];
+
   return (
-    <div className="relative flex-1 h-full w-full bg-[#0a0b0e] overflow-hidden">
+    <div className="relative flex-1 h-full w-full bg-[#08090c] overflow-hidden select-none">
       {/* OpenLayers Map Canvas */}
       <div ref={mapElement} className="w-full h-full" />
 
-      {/* Crosshair Center Reticle */}
-      <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-30">
-        <Crosshair className={`w-8 h-8 ${isHud ? 'text-amber-500' : 'text-slate-400'}`} />
+      {/* Tactical Screen Corner HUD Brackets */}
+      <div className="absolute top-3 left-3 pointer-events-none opacity-40 text-slate-400 font-mono text-xs">
+        ┌ 18.47°N / 77.40°E
+      </div>
+      <div className="absolute top-3 right-16 pointer-events-none opacity-40 text-slate-400 font-mono text-xs text-right">
+        18.47°N / 77.48°E ┐
+      </div>
+      <div className="absolute bottom-12 left-3 pointer-events-none opacity-40 text-slate-400 font-mono text-xs">
+        └ 18.40°N / 77.40°E
+      </div>
+      <div className="absolute bottom-12 right-3 pointer-events-none opacity-40 text-slate-400 font-mono text-xs text-right">
+        18.40°N / 77.48°E ┘
       </div>
 
+      {/* Crosshair Center Reticle */}
+      <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-25">
+        <Crosshair className={`w-10 h-10 ${isHud ? 'text-amber-500' : 'text-cyan-400'}`} />
+      </div>
+
+      {/* Floating Tactical Quick Toolbar (Top Center) */}
+      {!isHud && (
+        <div className="absolute top-3.5 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 p-1 rounded-xl bg-slate-950/85 border border-slate-800/90 shadow-2xl backdrop-blur-xl font-mono text-xs">
+          <button
+            onClick={handleCenterHabitat}
+            className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white flex items-center gap-1.5 transition-all border border-slate-800 shadow-sm"
+            title="Pan map to Habitat Alpha base"
+          >
+            <TargetIcon className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Center Base</span>
+          </button>
+
+          <button
+            onClick={() => toggleLayer('usgs_geology_units')}
+            className={`px-2.5 py-1 rounded-lg flex items-center gap-1.5 transition-all border shadow-sm ${
+              isGeologyActive
+                ? 'bg-purple-950 text-purple-200 border-purple-700 font-bold'
+                : 'bg-slate-900 hover:bg-slate-800 text-slate-400 border-slate-800'
+            }`}
+            title="Toggle USGS SIM 3464 Geologic Units Layer"
+          >
+            <Layers className="w-3.5 h-3.5 text-purple-400" />
+            <span>USGS Geology</span>
+          </button>
+
+          <div className="h-4 w-px bg-slate-800 mx-0.5" />
+
+          <div className="px-2 py-1 text-[10px] text-slate-400 flex items-center gap-1">
+            <Radio className="w-3 h-3 text-emerald-400 animate-pulse" />
+            <span className="hidden sm:inline">Comms LOS: Direct</span>
+          </div>
+        </div>
+      )}
+
       {/* Tactical Compass / North Arrow */}
-      <div className="absolute top-4 right-4 z-10 flex flex-col items-center p-2 rounded-lg bg-black/60 backdrop-blur border border-slate-800 text-xs font-mono pointer-events-none select-none">
+      <div className="absolute top-4 right-4 z-10 flex flex-col items-center p-2 rounded-xl bg-slate-950/85 backdrop-blur-xl border border-slate-800/80 text-xs font-mono pointer-events-none select-none shadow-xl">
         <Compass className={`w-6 h-6 mb-1 ${isHud ? 'text-amber-400' : 'text-red-500'}`} />
-        <span className="font-bold text-[10px]">N (000°)</span>
+        <span className="font-bold text-[10px] tracking-wider text-slate-300">N (000°)</span>
       </div>
 
       {/* Geological Unit Inspector Card */}
       {selectedGeology && (
-        <div className="absolute top-4 left-4 z-20 w-80 p-3.5 rounded-xl bg-slate-950/95 border border-slate-700/80 shadow-2xl backdrop-blur text-slate-200 font-mono space-y-2.5 animate-in fade-in slide-in-from-top-2">
+        <div className="absolute top-14 left-4 z-20 w-84 p-4 rounded-2xl bg-slate-950/95 border border-slate-700/80 shadow-2xl backdrop-blur-2xl text-slate-200 font-mono space-y-3 animate-in fade-in slide-in-from-top-3 ring-1 ring-white/10">
           <div className="flex items-start justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <span
-                className="w-3.5 h-3.5 rounded-full shrink-0 border border-white/40"
+                className="w-4 h-4 rounded-full shrink-0 border border-white/60 shadow-md"
                 style={{ backgroundColor: selectedGeology.color }}
               />
               <div>
-                <span className="text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-800 text-cyan-300">
+                <span className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full bg-slate-800 text-cyan-300 border border-slate-700">
                   {selectedGeology.code}
                 </span>
-                <h4 className="text-xs font-bold text-white mt-0.5">
+                <h4 className="text-xs font-bold text-white mt-1">
                   {selectedGeology.name}
                 </h4>
               </div>
             </div>
             <button
               onClick={() => setSelectedGeology(null)}
-              className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-800 transition-colors"
+              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="text-[11px] space-y-1.5 border-t border-slate-800/80 pt-2 text-slate-300 leading-snug">
+          <div className="text-[11px] space-y-1.5 border-t border-slate-800/90 pt-2 text-slate-300 leading-snug">
             <div>
               <span className="text-slate-500 font-semibold mr-1.5">Stratigraphy:</span>
               <span>{selectedGeology.stratigraphy}</span>
@@ -472,9 +548,9 @@ export const MapView: React.FC<MapViewProps> = ({
           </div>
 
           {selectedGeology.drill_cores.length > 0 && (
-            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px]">
+            <div className="pt-2 border-t border-slate-800/90 flex items-center justify-between text-[10px]">
               <span className="text-slate-500">M2020 Drill Cores:</span>
-              <span className="px-1.5 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 font-bold">
+              <span className="px-2 py-0.5 rounded-full bg-purple-950 text-purple-300 border border-purple-800 font-bold shadow-sm">
                 {selectedGeology.drill_cores.join(', ')}
               </span>
             </div>
@@ -489,10 +565,10 @@ export const MapView: React.FC<MapViewProps> = ({
             const view = mapRef.current?.getView();
             view?.setZoom((view.getZoom() ?? 13) + 1);
           }}
-          className={`p-2 rounded-lg border backdrop-blur transition-all ${
+          className={`p-2 rounded-xl border backdrop-blur-xl transition-all shadow-lg active:scale-95 ${
             isHud
-              ? 'bg-black/80 border-amber-500/50 text-amber-400 hover:bg-amber-950/60'
-              : 'bg-slate-900/80 border-slate-700 text-slate-200 hover:bg-slate-800'
+              ? 'bg-black/85 border-amber-500/50 text-amber-400 hover:bg-amber-950/60'
+              : 'bg-slate-950/85 border-slate-800 text-slate-200 hover:bg-slate-800'
           }`}
           title="Zoom In"
         >
@@ -503,10 +579,10 @@ export const MapView: React.FC<MapViewProps> = ({
             const view = mapRef.current?.getView();
             view?.setZoom((view.getZoom() ?? 13) - 1);
           }}
-          className={`p-2 rounded-lg border backdrop-blur transition-all ${
+          className={`p-2 rounded-xl border backdrop-blur-xl transition-all shadow-lg active:scale-95 ${
             isHud
-              ? 'bg-black/80 border-amber-500/50 text-amber-400 hover:bg-amber-950/60'
-              : 'bg-slate-900/80 border-slate-700 text-slate-200 hover:bg-slate-800'
+              ? 'bg-black/85 border-amber-500/50 text-amber-400 hover:bg-amber-950/60'
+              : 'bg-slate-950/85 border-slate-800 text-slate-200 hover:bg-slate-800'
           }`}
           title="Zoom Out"
         >
@@ -514,23 +590,32 @@ export const MapView: React.FC<MapViewProps> = ({
         </button>
       </div>
 
-      {/* Coordinate HUD Readout Bar */}
-      <div className={`absolute bottom-3 left-4 z-10 px-3 py-1.5 rounded-lg border font-mono text-xs backdrop-blur flex items-center gap-4 ${
-        isHud
-          ? 'bg-black/80 border-amber-500/50 text-amber-300'
-          : 'bg-slate-900/80 border-slate-800 text-slate-300'
-      }`}>
-        <div>
-          <span className="text-slate-500 mr-1.5">LON:</span>
-          {cursorCoord ? `${cursorCoord.lon}°E` : '77.4400°E'}
+      {/* Tactical Coordinate & Telemetry HUD Readout Bar */}
+      <div
+        className={`absolute bottom-3 left-4 z-10 px-3.5 py-1.5 rounded-xl border font-mono text-xs backdrop-blur-xl flex items-center gap-4 shadow-xl ${
+          isHud
+            ? 'bg-black/90 border-amber-500/50 text-amber-300'
+            : 'bg-slate-950/90 border-slate-800 text-slate-300'
+        }`}
+      >
+        <div className="flex items-center gap-1.5">
+          <span className="text-slate-500 font-bold">LON:</span>
+          <span className="text-white font-semibold">{cursorCoord ? `${cursorCoord.lon}°E` : '77.4400°E'}</span>
         </div>
-        <div>
-          <span className="text-slate-500 mr-1.5">LAT:</span>
-          {cursorCoord ? `${cursorCoord.lat}°N` : '18.4350°N'}
+        <div className="flex items-center gap-1.5">
+          <span className="text-slate-500 font-bold">LAT:</span>
+          <span className="text-white font-semibold">{cursorCoord ? `${cursorCoord.lat}°N` : '18.4350°N'}</span>
         </div>
-        <div className="hidden sm:block">
-          <span className="text-slate-500 mr-1.5">CRS:</span>
-          <span className="text-emerald-400">IAU2000 Mars Equirectangular</span>
+        <div className="hidden md:flex items-center gap-1.5 text-amber-300">
+          <Sun className="w-3.5 h-3.5 text-amber-400" />
+          <span>AZ {sunAzimuthDeg}° • ELEV {sunElevationDeg}°</span>
+        </div>
+        <div className="hidden lg:flex items-center gap-1.5 text-emerald-400">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span>RF LOS: DIRECT</span>
+        </div>
+        <div className="hidden sm:block text-[11px] text-slate-500">
+          IAU2000 Mars
         </div>
       </div>
     </div>

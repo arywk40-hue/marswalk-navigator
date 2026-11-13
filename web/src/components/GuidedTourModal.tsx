@@ -41,7 +41,8 @@ export const GuidedTourModal: React.FC<GuidedTourModalProps> = ({ onPlanRouteAct
     } else if (tourStep === 2) {
       // Move to Step 3: A* Route Planning
       clearWaypoints();
-      const baseAlpha = targets.find((t) => t.id === 'BASE-ALPHA') || targets[targets.length - 1];
+      const baseAlpha =
+        targets.find((t) => t.id === 'BASE-ALPHA') || targets[targets.length - 1];
       const sci1 = targets.find((t) => t.id === 'SCI-01') || targets[0];
       const sci2 = targets.find((t) => t.id === 'SCI-02') || targets[1];
       addWaypoint(baseAlpha);
@@ -83,8 +84,8 @@ export const GuidedTourModal: React.FC<GuidedTourModalProps> = ({ onPlanRouteAct
   const stepsData = [
     {
       step: 1,
-      badge: 'Step 1 of 5 • Data Fusion',
-      title: 'Hyperlocal NASA Multi-Mission Fusion',
+      badge: 'Step 1 of 5 • Multi-Mission Data Fusion',
+      title: 'Hyperlocal NASA & USGS Data Fusion',
       icon: <Layers className="w-5 h-5 text-red-500" />,
       content:
         'Marswalk Navigator combines 9 authentic NASA & USGS data layers over Jezero Crater: 25cm HiRISE controlled orthomosaic, USGS SIM 3464 geologic units, MOLA color shaded relief, Viking MDIM 2.1, MOLA elevation, 5m Horn slope, THEMIS thermal inertia, CRISM carbonates/clays, and hazard cost grid. Notice the transparent provenance tags (REAL, DERIVED, MODEL) on every layer.',
@@ -95,7 +96,7 @@ export const GuidedTourModal: React.FC<GuidedTourModalProps> = ({ onPlanRouteAct
       title: 'The Safe Return Envelope',
       icon: <ShieldCheck className="w-5 h-5 text-emerald-400" />,
       content:
-        'Unlike regional global viewers, Marswalk Navigator calculates a real-time Dijkstra isochrone flood-fill from Habitat Alpha. The shaded cyan perimeter shows everywhere the crew can walk and still return within nominal consumables and a NASA 1.5x reserve margin.',
+        'Unlike regional global viewers, Marswalk Navigator calculates a real-time Dijkstra isochrone flood-fill from Habitat Alpha. The shaded cyan perimeter shows everywhere the crew can walk and still return within nominal consumables and a NASA 1.5x reserve margin. Drag the budget slider to watch it dynamically scale.',
     },
     {
       step: 3,
@@ -108,14 +109,14 @@ export const GuidedTourModal: React.FC<GuidedTourModalProps> = ({ onPlanRouteAct
     {
       step: 4,
       badge: 'Step 4 of 5 • Multi-Scale Verification',
-      title: 'Planned vs. Expected Surface POV',
+      title: 'Planned vs. Expected Surface POV & Live Feed',
       icon: <Camera className="w-5 h-5 text-purple-400" />,
       content:
-        'To prepare astronauts for what they will see, selecting any science target loads real Perseverance Mastcam-Z / Navcam surface photography alongside the orbital HiRISE context, local slope grade, and recommended sampling tools.',
+        'To prepare astronauts for what they will see, selecting any science target loads real Perseverance Mastcam-Z / Navcam surface photography alongside the orbital HiRISE context, local slope grade, and recommended sampling tools. You can also explore live imagery from NASA’s public Mars 2020 Raw Image API.',
     },
     {
       step: 5,
-      badge: 'Step 5 of 5 • Space Weather & HUD',
+      badge: 'Step 5 of 5 • Space Weather & Helmet HUD',
       title: 'Solar Particle Event (SPE) & Helmet Visor HUD',
       icon: <Eye className="w-5 h-5 text-amber-400" />,
       content:
@@ -126,19 +127,21 @@ export const GuidedTourModal: React.FC<GuidedTourModalProps> = ({ onPlanRouteAct
   const current = stepsData[tourStep - 1] || stepsData[0];
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-xl px-4 animate-bounce-short">
-      <div className="bg-[#12141e]/98 border-2 border-cyan-500/80 rounded-2xl p-5 shadow-2xl backdrop-blur-md text-slate-100 flex flex-col space-y-3.5">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-xl px-4 animate-in fade-in slide-in-from-bottom-4">
+      <div className="bg-[#0e1017]/95 border-2 border-cyan-500/80 rounded-2xl p-5 shadow-[0_10px_40px_rgba(6,182,212,0.25)] backdrop-blur-2xl text-slate-100 flex flex-col space-y-3.5 ring-1 ring-white/10">
         {/* Top Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {current.icon}
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 rounded-lg bg-slate-900 border border-slate-800">
+              {current.icon}
+            </div>
             <span className="text-xs font-mono font-bold tracking-wider text-cyan-400 uppercase">
               {current.badge}
             </span>
           </div>
           <button
             onClick={() => setTourStep(null)}
-            className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
             title="Exit Tour"
           >
             <X className="w-4 h-4" />
@@ -147,7 +150,7 @@ export const GuidedTourModal: React.FC<GuidedTourModalProps> = ({ onPlanRouteAct
 
         {/* Title & Body */}
         <div>
-          <h3 className="text-base font-bold font-mono text-white mb-1">
+          <h3 className="text-base font-bold font-mono text-white mb-1.5">
             {current.title}
           </h3>
           <p className="text-xs text-slate-300 leading-relaxed font-sans">
@@ -156,17 +159,17 @@ export const GuidedTourModal: React.FC<GuidedTourModalProps> = ({ onPlanRouteAct
         </div>
 
         {/* Stepper Buttons & Progress Dots */}
-        <div className="flex items-center justify-between pt-1 border-t border-slate-800/80">
-          <div className="flex gap-1.5">
+        <div className="flex items-center justify-between pt-2 border-t border-slate-800/80">
+          <div className="flex items-center gap-1.5">
             {stepsData.map((s) => (
               <span
                 key={s.step}
-                className={`w-2 h-2 rounded-full transition-all ${
+                className={`h-2 rounded-full transition-all duration-300 ${
                   s.step === tourStep
-                    ? 'w-6 bg-cyan-400'
+                    ? 'w-7 bg-cyan-400 shadow-sm shadow-cyan-400'
                     : s.step < tourStep
-                    ? 'bg-emerald-400'
-                    : 'bg-slate-700'
+                    ? 'w-2 bg-emerald-400'
+                    : 'w-2 bg-slate-700'
                 }`}
               />
             ))}
@@ -176,7 +179,7 @@ export const GuidedTourModal: React.FC<GuidedTourModalProps> = ({ onPlanRouteAct
             {tourStep > 1 && (
               <button
                 onClick={handlePrev}
-                className="py-1.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono rounded-lg flex items-center gap-1 transition-colors"
+                className="py-1.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono rounded-lg flex items-center gap-1 transition-colors border border-slate-700"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
                 Back
@@ -184,7 +187,7 @@ export const GuidedTourModal: React.FC<GuidedTourModalProps> = ({ onPlanRouteAct
             )}
             <button
               onClick={handleNext}
-              className="py-1.5 px-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-mono font-bold text-xs rounded-lg flex items-center gap-1.5 transition-all shadow-lg shadow-cyan-950"
+              className="py-1.5 px-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-mono font-bold text-xs rounded-lg flex items-center gap-1.5 transition-all shadow-lg shadow-cyan-950 active:scale-95"
             >
               <span>{tourStep === totalSteps ? 'Complete Tour' : 'Next Step'}</span>
               <ChevronRight className="w-3.5 h-3.5" />

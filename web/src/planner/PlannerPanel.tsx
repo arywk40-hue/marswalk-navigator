@@ -104,11 +104,6 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
 
     const geojsonData = {
       type: 'FeatureCollection',
-      name: 'Marswalk Navigator Planned EVA Route',
-      crs: {
-        type: 'name',
-        properties: { name: 'urn:ogc:def:crs:OGC:1.3:CRS84' },
-      },
       features: [
         {
           type: 'Feature',
@@ -117,6 +112,7 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
             coordinates: plannedRoute.coordinates,
           },
           properties: {
+            name: 'Marswalk Planned Traverse',
             mission: 'EVA-01 Delta-Prospector',
             site: 'Jezero Crater Western Delta',
             mobility_mode: plannedRoute.mobilityMode,
@@ -145,53 +141,65 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  const budgetPresets = [
+    { mins: 45, label: '45m' },
+    { mins: 90, label: '1.5h' },
+    { mins: 180, label: '3h (Nominal)' },
+    { mins: 270, label: '4.5h' },
+    { mins: 360, label: '6h (Full Sol)' },
+  ];
+
   return (
-    <div className="w-80 bg-[#12141c]/95 border-r border-slate-800 flex flex-col h-full text-slate-200 select-none backdrop-blur z-20">
+    <div className="w-80 bg-[#10121a]/95 border-r border-slate-800/80 flex flex-col h-full text-slate-200 select-none backdrop-blur-xl z-20 shadow-2xl">
       {/* Panel Header */}
-      <div className="p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
+      <div className="p-3.5 border-b border-slate-800/80 flex items-center justify-between bg-slate-900/60">
         <div className="flex items-center gap-2">
           <Route className="w-4 h-4 text-cyan-400" />
           <h2 className="text-xs font-mono font-bold tracking-wider uppercase text-slate-100">
             A* Route & SEXTANT
           </h2>
         </div>
-        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-cyan-400 border border-slate-700">
+        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800/90 text-cyan-300 border border-slate-700/80 shadow-sm font-semibold">
           5m Cost Grid
         </span>
       </div>
 
-      <div className="p-3.5 flex-1 overflow-y-auto space-y-4">
+      <div className="p-3.5 flex-1 overflow-y-auto space-y-4 custom-scrollbar">
         {/* Mobility Mode Toggle (Problem Statement & SEXTANT: 2 Astronauts vs Rover Carrier) */}
         <div className="space-y-1.5">
-          <div className="text-[10px] font-mono uppercase text-slate-400 tracking-wider font-semibold">
+          <div className="text-[10px] font-mono uppercase text-slate-400 tracking-wider font-bold">
             Traverse Mobility Logistics
           </div>
-          <div className="grid grid-cols-2 gap-1.5 bg-slate-900/90 p-1 rounded-lg border border-slate-800 text-xs font-mono">
+          <div className="grid grid-cols-2 gap-2 font-mono text-xs">
             <button
               onClick={() => handleModeChange('foot')}
-              className={`py-1.5 px-2 rounded-md flex items-center justify-center gap-1.5 transition-all ${
+              className={`p-2.5 rounded-xl border flex flex-col gap-1 transition-all text-left shadow-sm active:scale-95 ${
                 mobilityMode === 'foot'
-                  ? 'bg-blue-600 text-white font-bold shadow'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-blue-950/80 border-blue-500 text-white shadow-blue-950/50 ring-1 ring-blue-500/50'
+                  : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
               }`}
             >
-              <User className="w-3.5 h-3.5" />
-              <span>Foot (2 Crew)</span>
+              <div className="flex items-center gap-1.5 font-bold">
+                <User className="w-3.5 h-3.5 text-blue-400" />
+                <span>Foot (2 Crew)</span>
+              </div>
+              <span className="text-[10px] text-slate-400">2.5 km/h • 8h suit O₂</span>
             </button>
+
             <button
               onClick={() => handleModeChange('rover')}
-              className={`py-1.5 px-2 rounded-md flex items-center justify-center gap-1.5 transition-all ${
+              className={`p-2.5 rounded-xl border flex flex-col gap-1 transition-all text-left shadow-sm active:scale-95 ${
                 mobilityMode === 'rover'
-                  ? 'bg-amber-600 text-white font-bold shadow'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-amber-950/80 border-amber-500 text-white shadow-amber-950/50 ring-1 ring-amber-500/50'
+                  : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
               }`}
             >
-              <Truck className="w-3.5 h-3.5" />
-              <span>Rover Carrier</span>
+              <div className="flex items-center gap-1.5 font-bold">
+                <Truck className="w-3.5 h-3.5 text-amber-400" />
+                <span>Rover Carrier</span>
+              </div>
+              <span className="text-[10px] text-slate-400">5.0 km/h • 12h aux power</span>
             </button>
-          </div>
-          <div className="text-[9px] font-mono text-slate-500">
-            {mobilityMode === 'foot' ? '2.5 km/h walking speed • 8h suit O2' : '5.0 km/h rover assist • 12h aux power + tool depot'}
           </div>
         </div>
 
@@ -200,10 +208,10 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
           <button
             onClick={() => handlePlanRoute()}
             disabled={waypoints.length < 2 || isPlanning}
-            className={`w-full py-2.5 px-4 rounded-lg font-mono text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 transition-all shadow-lg ${
+            className={`w-full py-2.5 px-4 rounded-xl font-mono text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 ${
               waypoints.length < 2
                 ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-                : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-cyan-950/50 border border-cyan-400/40 cursor-pointer active:scale-[0.98]'
+                : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-cyan-950/60 border border-cyan-400/50 cursor-pointer'
             }`}
           >
             <Navigation className={`w-4 h-4 ${isPlanning ? 'animate-spin' : ''}`} />
@@ -211,14 +219,14 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
           </button>
 
           {waypoints.length < 2 && (
-            <div className="text-[11px] text-amber-400/90 font-mono bg-amber-950/30 p-2 rounded border border-amber-900/50">
+            <div className="text-[11px] text-amber-300/90 font-mono bg-amber-950/30 p-2.5 rounded-xl border border-amber-900/60 leading-relaxed">
               Select at least 2 points (e.g. Base Alpha + 1 Science Stop) to compute traversal.
             </div>
           )}
         </div>
 
         {/* Hero Feature 1: Safe Return Envelope Controls & Isochrone Slider */}
-        <div className="p-3 rounded-lg bg-slate-900/90 border border-cyan-500/30 space-y-2.5">
+        <div className="p-3.5 rounded-xl bg-slate-900/90 border border-cyan-500/30 space-y-2.5 shadow-md">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-mono font-bold text-cyan-300 flex items-center gap-1.5 uppercase">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
@@ -237,7 +245,7 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
           </div>
 
           {showEnvelope && (
-            <div className="space-y-1 pt-1 border-t border-slate-800">
+            <div className="space-y-2 pt-1 border-t border-slate-800/80">
               <div className="flex justify-between text-[10px] font-mono text-slate-300">
                 <span>Max Excursion Budget:</span>
                 <span className="text-cyan-400 font-bold">
@@ -252,19 +260,32 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
                 disabled={speActive}
                 value={speActive ? 40 : maxSortieMin}
                 onChange={(e) => handleSortieSlider(Number(e.target.value))}
-                className="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-400 disabled:opacity-50"
+                className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400 disabled:opacity-50"
               />
-              <div className="flex justify-between text-[9px] font-mono text-slate-500">
-                <span>45m (Short)</span>
-                <span>180m (Half)</span>
-                <span>360m (Full)</span>
+
+              {/* Quick Preset Buttons for Budget */}
+              <div className="flex justify-between gap-1 pt-0.5">
+                {budgetPresets.map((p) => (
+                  <button
+                    key={p.mins}
+                    onClick={() => handleSortieSlider(p.mins)}
+                    disabled={speActive}
+                    className={`px-1.5 py-0.5 rounded text-[9px] font-mono transition-all border ${
+                      maxSortieMin === p.mins
+                        ? 'bg-cyan-950 text-cyan-300 border-cyan-700 font-bold'
+                        : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200'
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
               </div>
             </div>
           )}
         </div>
 
         {/* Hero Feature 2: Perseverance Rover Traverse Benchmark Card */}
-        <div className="p-3 rounded-lg bg-slate-900/80 border border-amber-500/30 space-y-2">
+        <div className="p-3.5 rounded-xl bg-slate-900/90 border border-amber-500/30 space-y-2 shadow-md">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-mono font-bold text-amber-300 flex items-center gap-1.5 uppercase">
               <Layers className="w-4 h-4 text-amber-400" />
@@ -282,13 +303,13 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
             Real ground-truth rover route (Sols 0–1050) across Three Forks to Hawksbill Gap.
           </div>
 
-          <div className="p-2 rounded bg-slate-950 border border-slate-800/80 text-[10px] font-mono space-y-1">
+          <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80 text-[10px] font-mono space-y-1">
             <div className="flex justify-between">
-              <span className="text-slate-500">Model Validity Match:</span>
+              <span className="text-slate-500 font-semibold">Model Validity Match:</span>
               <span className="text-emerald-400 font-bold">94.6% Agreement</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Slope &gt; 15° Crossings:</span>
+              <span className="text-slate-500 font-semibold">Slope &gt; 15° Crossings:</span>
               <span className="text-emerald-400 font-bold">0 Violations</span>
             </div>
           </div>
@@ -296,56 +317,68 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
 
         {/* Planned Route Summary Card */}
         {plannedRoute && (
-          <div className="p-3 rounded-lg bg-slate-900 border border-slate-700 space-y-3">
+          <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700/80 space-y-3 shadow-md">
             <div className="flex items-center justify-between border-b border-slate-800 pb-2">
               <span className="text-xs font-bold text-white font-mono flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 Optimal Route Solution
               </span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 font-bold">
                 A* VERIFIED
               </span>
             </div>
 
             {/* Metrics Grid */}
             <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-              <div className="p-2 rounded bg-slate-950 border border-slate-800/80">
-                <div className="text-[10px] text-slate-500">TOTAL DISTANCE</div>
+              <div className="p-2 rounded-lg bg-slate-950 border border-slate-800/80">
+                <div className="text-[10px] text-slate-500 font-semibold">TOTAL DISTANCE</div>
                 <div className="text-sm font-bold text-cyan-300">
                   {formatDistance(plannedRoute.totalDistance_m)}
                 </div>
               </div>
 
-              <div className="p-2 rounded bg-slate-950 border border-slate-800/80">
-                <div className="text-[10px] text-slate-500">ESTIMATED TIME</div>
+              <div className="p-2 rounded-lg bg-slate-950 border border-slate-800/80">
+                <div className="text-[10px] text-slate-500 font-semibold">ESTIMATED TIME</div>
                 <div className="text-sm font-bold text-cyan-300">
                   {formatDuration(plannedRoute.totalDuration_min)}
                 </div>
               </div>
 
-              <div className="p-2 rounded bg-slate-950 border border-slate-800/80">
-                <div className="text-[10px] text-slate-500">MAX SLOPE</div>
-                <div className={`text-sm font-bold ${
-                  plannedRoute.maxSlope_deg >= 15 ? 'text-red-400' : plannedRoute.maxSlope_deg >= 10 ? 'text-amber-400' : 'text-emerald-400'
-                }`}>
+              <div className="p-2 rounded-lg bg-slate-950 border border-slate-800/80">
+                <div className="text-[10px] text-slate-500 font-semibold">MAX SLOPE</div>
+                <div
+                  className={`text-sm font-bold ${
+                    plannedRoute.maxSlope_deg >= 15
+                      ? 'text-red-400'
+                      : plannedRoute.maxSlope_deg >= 10
+                      ? 'text-amber-400'
+                      : 'text-emerald-400'
+                  }`}
+                >
                   {plannedRoute.maxSlope_deg}°
                 </div>
               </div>
 
-              <div className="p-2 rounded bg-slate-950 border border-slate-800/80">
-                <div className="text-[10px] text-slate-500">COMMS DIRECT LOS</div>
-                <div className={`text-sm font-bold ${plannedRoute.commsLos_pct > 80 ? 'text-emerald-400' : 'text-amber-400'}`}>
+              <div className="p-2 rounded-lg bg-slate-950 border border-slate-800/80">
+                <div className="text-[10px] text-slate-500 font-semibold">COMMS DIRECT LOS</div>
+                <div
+                  className={`text-sm font-bold ${
+                    plannedRoute.commsLos_pct > 80 ? 'text-emerald-400' : 'text-amber-400'
+                  }`}
+                >
                   {plannedRoute.commsLos_pct}% Connected
                 </div>
               </div>
             </div>
 
             {/* Walk-Back Margin Rule Status */}
-            <div className={`p-2 rounded text-xs border flex items-center gap-2 ${
-              plannedRoute.walkBackMarginSafe
-                ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300'
-                : 'bg-red-950/40 border-red-800/60 text-red-300'
-            }`}>
+            <div
+              className={`p-2.5 rounded-lg text-xs border flex items-center gap-2 ${
+                plannedRoute.walkBackMarginSafe
+                  ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300'
+                  : 'bg-red-950/40 border-red-800/60 text-red-300'
+              }`}
+            >
               {plannedRoute.walkBackMarginSafe ? (
                 <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-400" />
               ) : (
@@ -353,50 +386,16 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
               )}
               <div className="text-[11px] leading-tight font-mono">
                 <strong>Walk-Back Margin:</strong>{' '}
-                {plannedRoute.walkBackMarginSafe ? '1.5× Safe Reserve Confirmed' : 'Exceeds Safety Reserve'} ({formatDistance(plannedRoute.walkBackDistance_m)} to Hab)
+                {plannedRoute.walkBackMarginSafe ? '1.5× Safe Reserve Confirmed' : 'Exceeds Safety Reserve'} (
+                {formatDistance(plannedRoute.walkBackDistance_m)} to Hab)
               </div>
             </div>
-
-            {/* Elevation Profile SVG Mini-Chart */}
-            {plannedRoute.elevationProfile.length > 2 && (
-              <div className="space-y-1.5 pt-1">
-                <div className="text-[10px] font-mono text-slate-400 flex justify-between">
-                  <span>Elevation Profile</span>
-                  <span>Δh = {plannedRoute.elevationGain_m}m</span>
-                </div>
-                <div className="h-16 w-full bg-slate-950 rounded border border-slate-800 overflow-hidden relative p-1">
-                  <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40">
-                    <polyline
-                      fill="none"
-                      stroke="#00f0ff"
-                      strokeWidth="2"
-                      points={plannedRoute.elevationProfile
-                        .map((pt, idx, arr) => {
-                          const x = (idx / (arr.length - 1)) * 100;
-                          const minEl = Math.min(...arr.map((p) => p.elevation_m));
-                          const maxEl = Math.max(...arr.map((p) => p.elevation_m));
-                          const range = Math.max(10, maxEl - minEl);
-                          const y = 35 - ((pt.elevation_m - minEl) / range) * 30;
-                          return `${x.toFixed(1)},${y.toFixed(1)}`;
-                        })
-                        .join(' ')}
-                    />
-                  </svg>
-                  <div className="absolute bottom-1 left-2 text-[9px] font-mono text-slate-500">
-                    {Math.round(plannedRoute.elevationProfile[0].elevation_m)}m
-                  </div>
-                  <div className="absolute top-1 right-2 text-[9px] font-mono text-slate-500">
-                    {Math.round(plannedRoute.elevationProfile[plannedRoute.elevationProfile.length - 1].elevation_m)}m
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* Astronaut Flight Exports (GeoJSON & Cue Card) */}
             <div className="pt-2 border-t border-slate-800 flex gap-2">
               <button
                 onClick={handleExportGeoJSON}
-                className="flex-1 py-1.5 px-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-mono font-medium rounded-lg flex items-center justify-center gap-1.5 border border-slate-700 transition-colors"
+                className="flex-1 py-1.5 px-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-mono font-medium rounded-lg flex items-center justify-center gap-1.5 border border-slate-700 transition-colors shadow-sm active:scale-95"
                 title="Download Route as Standard GIS GeoJSON"
               >
                 <Download className="w-3.5 h-3.5 text-cyan-400" />
@@ -404,7 +403,7 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
               </button>
               <button
                 onClick={() => setCueCardOpen(true)}
-                className="flex-1 py-1.5 px-2 bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 text-[11px] font-mono font-medium rounded-lg flex items-center justify-center gap-1.5 border border-amber-500/50 transition-colors"
+                className="flex-1 py-1.5 px-2 bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 text-[11px] font-mono font-medium rounded-lg flex items-center justify-center gap-1.5 border border-amber-500/50 transition-colors shadow-sm active:scale-95"
                 title="Open Astronaut Suit Cuff Checklist"
               >
                 <FileText className="w-3.5 h-3.5 text-amber-400" />

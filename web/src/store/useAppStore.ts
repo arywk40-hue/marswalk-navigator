@@ -20,11 +20,14 @@ interface AppState {
   tourStep: number | null; // Guided tour step (1 - 5)
   maxSortieMin: number; // Excursion budget in minutes
   mobilityMode: 'foot' | 'rover'; // Foot EVA vs Rover-assisted
+  isLeftSidebarOpen: boolean;
+  isRightDrawerOpen: boolean;
 
   // Actions
   setManifest: (manifest: Manifest) => void;
   setTargets: (targets: Target[]) => void;
   toggleLayer: (id: string) => void;
+  setLayersVisibilityBatch: (visibility: Record<string, boolean>) => void;
   setLayerOpacity: (id: string, opacity: number) => void;
   setDisplayMode: (mode: DisplayMode) => void;
   setSelectedTarget: (target: Target | null) => void;
@@ -41,6 +44,8 @@ interface AppState {
   setTourStep: (step: number | null) => void;
   setMaxSortieMin: (mins: number) => void;
   setMobilityMode: (mode: 'foot' | 'rover') => void;
+  toggleLeftSidebar: () => void;
+  toggleRightDrawer: () => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -62,6 +67,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   tourStep: null,
   maxSortieMin: 180.0,
   mobilityMode: 'foot',
+  isLeftSidebarOpen: true,
+  isRightDrawerOpen: true,
 
   setManifest: (manifest) => {
     const visibility: Record<string, boolean> = {};
@@ -88,6 +95,14 @@ export const useAppStore = create<AppState>((set, get) => ({
       },
     })),
 
+  setLayersVisibilityBatch: (visibility) =>
+    set((state) => ({
+      layerVisibility: {
+        ...state.layerVisibility,
+        ...visibility,
+      },
+    })),
+
   setLayerOpacity: (id, opacity) =>
     set((state) => ({
       layerOpacity: {
@@ -95,6 +110,10 @@ export const useAppStore = create<AppState>((set, get) => ({
         [id]: opacity,
       },
     })),
+
+  toggleLeftSidebar: () => set((state) => ({ isLeftSidebarOpen: !state.isLeftSidebarOpen })),
+
+  toggleRightDrawer: () => set((state) => ({ isRightDrawerOpen: !state.isRightDrawerOpen })),
 
   setDisplayMode: (mode) => set({ displayMode: mode }),
 
