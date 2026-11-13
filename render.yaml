@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: marswalk-backend
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: MARSWALK_DATA_DIR
+        value: web/public/data
+      - key: PYTHON_VERSION
+        value: 3.11.8
+    healthCheckPath: /health
+    autoDeploy: true

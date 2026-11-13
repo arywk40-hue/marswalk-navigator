@@ -53,7 +53,32 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
     setMobilityMode,
   } = useAppStore();
 
-  const handlePlanRoute = (modeOverride?: 'foot' | 'rover') => {
+  const [backendOnline, setBackendOnline] = React.useState<boolean>(false);
+
+  React.useEffect(() => {
+    let mounted = true;
+    const checkBackend = async () => {
+      try {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+        const res = await fetch(`${backendUrl}/health`, { signal: AbortSignal.timeout(1000) });
+        if (mounted) {
+          setBackendOnline(res.ok);
+        }
+      } catch {
+        if (mounted) {
+          setBackendOnline(false);
+        }
+      }
+    };
+    checkBackend();
+    const interval = setInterval(checkBackend, 15000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  const handlePlanRoute = async (modeOverride?: 'foot' | 'rover') => {
     if (!gridMeta || !costGrid || !slopeGrid || !elevGrid || waypoints.length < 2) {
       return;
     }
@@ -61,6 +86,53 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
     const currentMode = modeOverride || mobilityMode;
     setIsPlanning(true);
 
+    // Try Python Backend API first
+    try {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+      const routeRes = await fetch(`${backendUrl}/api/route`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          waypoints: waypoints.map((w) => ({
+            name: w.name,
+            coordinates: w.coordinates,
+            estimated_dwell_min: w.estimated_dwell_min || 30,
+          })),
+          mobility_mode: currentMode,
+          max_slope_deg: 20.0,
+        }),
+        signal: AbortSignal.timeout(2500),
+      });
+
+      if (routeRes.ok) {
+        const routeData = await routeRes.json();
+        setPlannedRoute(routeData);
+
+        // Fetch envelope from backend
+        const envRes = await fetch(`${backendUrl}/api/envelope`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            base_coordinates: waypoints[0].coordinates,
+            max_sortie_min: speActive ? 40.0 : maxSortieMin,
+            reserve_factor: 1.5,
+            mobility_mode: currentMode,
+          }),
+          signal: AbortSignal.timeout(1500),
+        });
+
+        if (envRes.ok) {
+          const envData = await envRes.json();
+          onEnvelopeGenerated(envData.geometry.coordinates);
+          setIsPlanning(false);
+          return;
+        }
+      }
+    } catch {
+      // Fall through to in-browser planner fallback
+    }
+
+    // Client-side fallback
     setTimeout(() => {
       try {
         const planner = new RoutePlanner(gridMeta, costGrid, slopeGrid, elevGrid);
@@ -79,7 +151,7 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
       } finally {
         setIsPlanning(false);
       }
-    }, 100);
+    }, 50);
   };
 
   const handleModeChange = (mode: 'foot' | 'rover') => {
@@ -87,9 +159,33 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
     handlePlanRoute(mode);
   };
 
-  const handleSortieSlider = (val: number) => {
+  const handleSortieSlider = async (val: number) => {
     setMaxSortieMin(val);
     if (gridMeta && costGrid && slopeGrid && waypoints.length > 0) {
+      if (backendOnline) {
+        try {
+          const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+          const envRes = await fetch(`${backendUrl}/api/envelope`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              base_coordinates: waypoints[0].coordinates,
+              max_sortie_min: speActive ? 40.0 : val,
+              reserve_factor: 1.5,
+              mobility_mode: mobilityMode,
+            }),
+            signal: AbortSignal.timeout(1000),
+          });
+          if (envRes.ok) {
+            const envData = await envRes.json();
+            onEnvelopeGenerated(envData.geometry.coordinates);
+            return;
+          }
+        } catch {
+          // fallback
+        }
+      }
+
       const envelopeGen = new ReturnEnvelopeGenerator(gridMeta, costGrid, slopeGrid);
       const baseCoord = waypoints[0].coordinates;
       const sortieLimit = speActive ? 40.0 : val;
@@ -162,6 +258,22 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
         <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800/90 text-cyan-300 border border-slate-700/80 shadow-sm font-semibold">
           5m Cost Grid
         </span>
+      </div>
+
+      {/* Compute Engine Status Bar */}
+      <div className="px-3.5 py-1.5 bg-slate-950/60 border-b border-slate-800/60 flex items-center justify-between text-[10px] font-mono">
+        <span className="text-slate-400">Compute Backend:</span>
+        {backendOnline ? (
+          <span className="inline-flex items-center gap-1.5 text-emerald-400 font-semibold" title="Python FastAPI REST Engine (Port 8000)">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            Python API (Port 8000)
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 text-slate-400" title="Offline Client-Side Engine Active">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+            Browser Engine (Offline)
+          </span>
+        )}
       </div>
 
       <div className="p-3.5 flex-1 overflow-y-auto space-y-4 custom-scrollbar">

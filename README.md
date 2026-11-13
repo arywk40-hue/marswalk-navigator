@@ -4,6 +4,7 @@
 
 [![Vitest](https://img.shields.io/badge/Vitest-Passing-brightgreen.svg)](https://vitest.dev)
 [![Pytest](https://img.shields.io/badge/Pytest-Passing-brightgreen.svg)](https://pytest.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-009688.svg)](https://fastapi.tiangolo.com)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org)
 [![License](https://img.shields.io/badge/License-MIT-lightgrey.svg)](LICENSE)
 
@@ -59,50 +60,80 @@ Instead of just drawing static lines, Marswalk Navigator computes a real-time **
 ## 3. Architecture & Tech Stack
 
 ```
-NASA Sources (Mars Trek WMTS, PDS, USGS, Mars 2020 API)
+NASA Sources (Mars Trek WMTS, PDS, USGS, Mars 2020 Raw Feed)
                        │
                        ▼
-         pipeline/ (Python 3.11 / 3.13)
-      [Fetch → AOI Clip → Slope Horn → Resample]
+          pipeline/ (Python 3.11 / 3.13)
+       [Fetch → AOI Clip → Slope Horn → Resample]
                        │
                        ▼
-       web/public/data/ (Static Assets)
-  [layers.json, targets.geojson, geology_units.geojson, cost.bin]
+        web/public/data/ (Static Rasters & GeoJSON)
+   [layers.json, targets.geojson, geology_units.geojson, cost.bin, elev.bin]
                        │
-                       ▼
-          web/ (React 18 + TS + Vite + OpenLayers)
-  [Equirectangular Mars Map, Zustand Store, Tobler Suit Engine]
-                       │
-                       ▼
-      Zero-Backend Static Deployment (GitHub Pages / Vercel)
+        ┌──────────────┴──────────────┐
+        ▼                             ▼
+ backend/ (FastAPI + Python A*)    web/ (React 18 + TS + Vite + OpenLayers)
+ [Dijkstra Isochrone & Routing]   [Equirectangular Mars Map, Visor HUD]
+ [REST API on Port 8000]          [Client-side Offline Resilient Engine]
+        │                             ▲
+        └─────────────────────────────┘
+          (Auto-detection & Fallback)
 ```
+
+### Backend Microservice & Mission Control API
+The Python FastAPI backend exposes high-performance surface navigation algorithms and telemetry endpoints:
+- `GET /` — API greeting, system operational specs, endpoint directory.
+- `GET /health` — Healthcheck reporting status `healthy`, Martian datum `IAU2000:49900`, 747,000 grid cells, and server uptime.
+- `POST /api/route` — Multi-leg A* traverse calculation across science stations with life support consumables ($O_2$, battery) and RF Line-of-Sight.
+- `POST /api/envelope` — Safe Return Envelope polygon generation honoring the mandatory 1.5× safety margin.
+- `GET /api/hazard?lon=77.442&lat=18.438` — Point-based terrain elevation, slope angle, and traversability cost query.
+- `GET /api/targets` & `GET /api/geology` — Authentic Jezero Crater Delta science stations and USGS SIM 3464 geological units.
+- `GET /api/weather` & `GET /api/radiation` — Simulated MEDA environmental telemetry and RAD dosimeter monitoring.
+- Interactive OpenAPI Swagger documentation live at [http://localhost:8000/docs](http://localhost:8000/docs).
 
 ---
 
-## 4. Quick Start & Development
+## 4. Quick Start & Deployment
 
-### Prerequisites
-- Node.js $\ge 18$ (tested on v22)
-- Python $\ge 3.11$
+### Running the Full Stack Locally
 
-### Running the Web Application
-```bash
-cd web
-npm install
-npm run dev
-```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+1. **Start the FastAPI Backend:**
+   ```bash
+   pip install -r backend/requirements.txt
+   uvicorn backend.app:app --host 0.0.0.0 --port 8000 --reload
+   ```
+   API & Swagger Docs will be available at [http://localhost:8000/docs](http://localhost:8000/docs).
+
+2. **Start the Vite Web Application:**
+   ```bash
+   cd web
+   npm install
+   npm run dev -- --host 0.0.0.0 --port 3000
+   ```
+   Open [http://localhost:3000](http://localhost:3000) in your browser. The app will automatically connect to the local Python backend, displaying `Python API (Port 8000)` in the planner panel.
+
+### Container & Cloud Deployment
+- **Docker:**
+  ```bash
+  docker build -f backend/Dockerfile -t marswalk-backend .
+  docker run -p 8000:8000 marswalk-backend
+  ```
+- **Render / Railway / Fly.io:** Preconfigured with [`render.yaml`](render.yaml), [`railway.json`](railway.json), and [`Procfile`](Procfile) for 1-click cloud container deployment.
+- **GitHub Pages Live App:** [https://arywk40-hue.github.io/marswalk-navigator/](https://arywk40-hue.github.io/marswalk-navigator/) (includes automatic client-side fallback if the cloud backend is offline).
 
 ### Running Test Suites
 ```bash
+# Backend REST API & Planner Engine Tests (Pytest)
+python3 -m pytest backend/tests
+
+# Pipeline Processing & AOI Validation Tests (Pytest)
+python3 -m pytest pipeline/tests
+
 # Frontend Unit & Math Tests (Vitest)
 cd web && npm test
 
-# Frontend Production Build (Zero TS Errors)
+# Production Build (Zero TS Errors)
 cd web && npm run build
-
-# Python Pipeline Configuration Tests (Pytest)
-python3 -m pytest pipeline/tests
 ```
 
 ---
