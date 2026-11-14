@@ -62,6 +62,7 @@ export const PlannerPanel: React.FC<PlannerPanelProps> = ({
       const candidates = [
         import.meta.env.VITE_BACKEND_URL,
         window.location.protocol === 'https:' ? null : 'http://localhost:8000',
+        'https://living-checking-eleven-skilled.trycloudflare.com',
         'https://delicious-congressional-pci-airline.trycloudflare.com',
       ].filter(Boolean) as string[];
 
