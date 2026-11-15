@@ -1,60 +1,87 @@
-# Marswalk Navigator — 2-Minute Video Pitch & Demo Script
+# Marswalk Navigator — Pitch Materials & Demo Scripts
 ### 2026 NASA Space Apps Challenge: *Interplanetary Survival Guide: Martian Map*
 
-> **Total Video Length:** 120 seconds (2:00)  
-> **Narrative Hook:** *"Two astronauts, seven hours of air, one critical question: How far can we safely explore?"*
+> ⚠️ **CRITICAL 2026 SUBMISSION LIMITATIONS:**  
+> As mandated by NASA Space Apps rules: **"Video must be 30 seconds or less, OR slide deck must be no more than seven slides (including title and intro slides). Projects that exceed these limits will NOT be eligible for Global Judging."**
 
 ---
 
-## Storyboard & Script
+## 🎬 Section 1: The Official 30-Second Video Pitch Script
+*(Strictly timed to 30.0 seconds, adhering to the 2026 rubric)*
 
-### Act 1: The Problem (0:00 - 0:25) — "The Regional Gap"
-- **Visual:** Open with a wide satellite view of Mars on NASA Mars Trek. Zoom into Jezero Crater.
-- **Narrator (Voiceover):**  
-  *"For decades, NASA’s robotic rovers have explored Mars. But when the first human explorers set foot in Jezero Crater, they won’t be surveying a continent—they’ll be walking across boulders, steep delta scarps, and loose aeolian sands in a pressurized suit.*  
-  *Existing tools like Mars Trek and USGS global maps are built for planetary orbits, not individual boots on the ground. Astronauts need a hyperlocal, safety-first map that tells them exactly where they can walk, what science to sample, and when they must turn back."*
-
----
-
-### Act 2: Data Fusion & USGS Geologic Mapping (0:25 - 0:50) — "Multi-Mission Fusion"
-- **Visual:** Screen recording of Marswalk Navigator in **Habitat Planning Mode**. Switch between HiRISE 25cm basemap, Horn Slope, THEMIS Thermal Inertia, and click on a USGS Geologic Unit polygon.
-- **Narrator:**  
-  *"Meet **Marswalk Navigator**. Centered on Jezero’s Western Delta Front, it fuses 9 authentic NASA and USGS datasets into one unified 5-meter grid.*  
-  *With zero fabricated data, it pairs 25-centimeter HiRISE imagery with Horn slope physics, CRISM biosignature clays, and the official peer-reviewed USGS SIM 3464 geologic map. With a single click, astronauts inspect the stratigraphy, age, and rock cores discovered by Perseverance."*
+| Timestamp | Rubric Focus | Spoken Script (Word Count: ~65 words @ ~130 wpm) | Visual Footage on Screen |
+|---|---|---|---|
+| **[0:00 - 0:02]** | **Introduce yourself & team** | *"Hello, we are Team Marswalk, and this is Marswalk Navigator."* | Title card with project logo, NASA challenge name, and team member names. |
+| **[0:02 - 0:05]** | **Lead us in (Problem & Motivation)** | *"When humans step onto Mars, regional orbiters won't keep them safe—every step requires boots-on-the-ground precision."* | Quick zoom: Global Mars satellite mosaic into steep Jezero Crater delta cliffs. |
+| **[0:05 - 0:10]** | **Name your project & tagline** | *"Marswalk Navigator is a hyperlocal, safety-first EVA route planner for Martian explorers."* | Interface opens showing the 5-meter HiRISE basemap and tactical toolbar. |
+| **[0:10 - 0:20]** | **Describe your idea & NASA data** | *"Fusing 9 NASA datasets, our hero feature—the Safe Return Envelope—uses real-time Dijkstra isochrones to guarantee a strict 1.5× consumables reserve, while suit-aware A* routing maneuvers around hazardous slopes and RF blackouts."* | Interactive demo: Slider moves, cyan safe envelope expands/contracts; A* traverse routes around $15^\circ$ scarp; Solar storm alert triggers helmet Visor HUD. |
+| **[0:20 - 0:30]** | **Look into the future** | *"From Jezero Crater to future lunar Artemis bases, Marswalk Navigator empowers humanity to safely explore new worlds and return home. Thank you."* | Quick cut: Printed Astronaut Cuff Cue Card, ending with a crewed Martian base visual and live GitHub/Pages link. |
 
 ---
 
-### Act 3: The Hero Feature — Safe Return Envelope & Routing (0:50 - 1:15)
-- **Visual:** Show the cyan **Safe Return Envelope** polygon expanding and contracting as the excursion budget slider moves. Click **Compute Safe Route**, showing the A* path tracing around steep scarps and the elevation profile updating.
-- **Narrator:**  
-  *"Our hero feature is the **Safe Return Envelope**. Instead of just drawing lines, our real-time Dijkstra isochrone calculates the exact perimeter crew can reach and safely return from with a mandatory NASA 1.5× consumables reserve.*  
-  *Our suit-aware A* algorithm plans an optimal traverse, dynamically modeling Tobler walking speeds in 0.38-gravity, checking 3D RF line-of-sight back to Habitat Alpha, and benchmarking paths against Perseverance’s real traverse."*
+## 📊 Section 2: The Official 7-Slide Pitch Deck Blueprint
+*(Strictly $\le 7$ slides, formatted for rapid judging comprehension)*
+
+### Slide 1: Title & Challenge Introduction
+- **Slide Title:** Marswalk Navigator
+- **Subtitle:** Hyperlocal EVA Surface Route & Hazard Planner for Martian Astronauts
+- **Challenge:** 2026 NASA Space Apps Challenge — *Interplanetary Survival Guide: Martian Map*
+- **Team Name & Members:** Team Marswalk (Ariyan Bhakat & Collaborators)
+- **Visual:** High-resolution screenshot of Marswalk Navigator centered on Jezero Crater Western Delta Front with NASA & Space Apps logos.
+
+### Slide 2: The Planetary Gap (Problem Statement)
+- **Slide Title:** The Problem: Regional Orbiters vs. Boots on the Ground
+- **Key Takeaways:**
+  - Tools like JPL Mars Trek operate at kilometer scales—blind to localized spacesuit obstacles.
+  - Astronauts in $0.38\,g$ pressurized suits face strict physical limits: joint fatigue, boulder obstacles, communication shadows, and consumable margins ($O_2$, power).
+  - The Question: *How far can two astronauts safely explore, conduct breakthrough science, and guarantee safe return?*
+- **Visual:** Side-by-side graphic contrasting kilometer-scale orbital photography vs. 5-meter human spacewalk scale at Hawksbill Gap.
+
+### Slide 3: Multi-Mission Data Fusion (9 Authentic Layers)
+- **Slide Title:** Multi-Mission Data Fusion on a 5-Meter Metric Grid
+- **Key Takeaways:**
+  - 100% authentic NASA data—zero synthetic topography or fabricated points.
+  - Optical (HiRISE 0.25m/px, Viking), Topographic (MOLA DEM, 5m Horn Slope), Thermal (THEMIS), and Spectral (CRISM biosignature clays).
+  - Direct integration of the official peer-reviewed USGS SIM 3464 Geologic Map with click-to-inspect stratigraphy and Perseverance drill cores.
+- **Visual:** Exploded-layer architectural diagram illustrating the 9 geospatial layers converging into the 5m hazard cost raster.
+
+### Slide 4: Hero Feature — The Safe Return Envelope
+- **Slide Title:** Hero Feature: The Safe Return Envelope (Dijkstra Isochrone)
+- **Key Takeaways:**
+  - Eliminates guesswork: calculates the real-time reachable exploration perimeter from Habitat Alpha.
+  - Strictly enforces NASA's mandatory 1.5× Consumables Reserve rule across all life support systems.
+  - Interactive sortie budget slider ($45 - 360\text{ min}$) dynamically recalculates the safe boundary in milliseconds.
+- **Visual:** High-contrast screenshot comparing nominal 180-min envelope vs. emergency 40-min contracted envelope over Jezero topography.
+
+### Slide 5: Suit-Aware A* Routing & SEXTANT Logistics
+- **Slide Title:** Terrain-Aware Traversal & Mission Logistics
+- **Key Takeaways:**
+  - **Martian Tobler Speed Model:** Walking speeds calibrated for $0.38\,g$ and spacesuit stiffness ($[0.4 - 3.2]\text{ km/h}$).
+  - **SEXTANT Logistics:** 1-click toggle between Foot EVA (2 Crew) and Rover Carrier ($5.0\text{ km/h}$, $12\text{h}$ aux power).
+  - **RF Line-of-Sight:** 3D elevation ray-marching to Habitat Alpha's antenna mast identifies comms shadows.
+  - **Ground-Truth Benchmark:** Traverses verified against Perseverance's real Sols 0–1050 route.
+- **Visual:** Traverse route map showing waypoint sequence, elevation cross-section profile, slope breakdown, and comms coverage indicator.
+
+### Slide 6: Crisis Alerting, Visor HUD & Real Imagery
+- **Slide Title:** Astronaut Field Usability & Situational Awareness
+- **Key Takeaways:**
+  - **Solar Particle Event (SPE) Simulation:** High radiation alert ($95\,\mu\text{Sv/h}$) triggers immediate abort routing.
+  - **Dual Display Modes:** Habitat Planning Mode vs. High-contrast EVA HUD Visor Mode for direct sunlight readability.
+  - **Point-of-View Imagery:** 9 verified NASA PIA surface photos + live query tool for NASA's 579,000+ Mars 2020 raw image feed.
+  - **Field Checklist:** Printable Astronaut Cuff Cue Card formatted for spacesuit forearm mounting.
+- **Visual:** High-contrast helmet visor interface screenshot alongside a real Perseverance Mastcam-Z panorama of Hawksbill Gap.
+
+### Slide 7: Impact & The Interplanetary Future
+- **Slide Title:** Impact: From Jezero Crater to the Moon and Beyond
+- **Key Takeaways:**
+  - **Immediate Impact:** Provides the first operational, open-source EVA traverse planner built on authentic Martian data.
+  - **Extensible Architecture:** Metric grid algorithms directly transfer to Artemis lunar south pole exploration (Shackleton Crater).
+  - **Open Science:** 100% open-source, fully tested (18/18 passing tests), deployed live with zero backend dependency barriers.
+- **Visual:** Conceptual roadmap graphic illustrating Marswalk Navigator powering Lunar Artemis base operations and Mars human base buildup. Live links & QR code.
 
 ---
 
-### Act 4: Crisis Alert & Helmet HUD (1:15 - 1:40)
-- **Visual:** Click **Simulate SPE Radiation Event**. The screen shifts to a red alert, the envelope contracts, and the user switches into **EVA HUD Mode**.
-- **Narrator:**  
-  *"Safety is non-negotiable. When an unexpected Solar Particle Event strikes, radiation surges tenfold. Marswalk Navigator instantly sounds an abort alert, contracts the safe envelope to 40 minutes, and re-routes the crew to the nearest storm shelter.*  
-  *Switching to **EVA HUD Mode**, the display transforms into a high-contrast visor view readable in direct sunlight, providing glanceable bearings, walk-back margins, and suit vitals."*
+## 🎙️ Section 3: Extended 2-Minute Script (For Team Presentations)
+*(Use for live judge Q&A, extended demo presentations, or team portfolios)*
 
----
-
-### Act 5: Real Ground-Truth & Call to Action (1:40 - 2:00)
-- **Visual:** Open **Surface Imagery & POV**, showing real Mastcam-Z photos and querying NASA’s live Mars 2020 Raw Image API. Show the printable **Astronaut Cuff Cue Card**.
-- **Narrator:**  
-  *"Before taking a single step, astronauts inspect verified Perseverance Mastcam-Z photography or query NASA's live Mars 2020 raw image feed directly in the browser.*  
-  *With custom field waypoints, GeoJSON exports, and printed cuff cue cards, Marswalk Navigator transforms NASA data into an interplanetary survival guide.*  
-  *Explore Marswalk Navigator live today on GitHub and Vercel. Thank you."*
-
----
-
-## Slide Deck Outline (If Submitting Slides)
-- **Slide 1 (Title):** Project Name, Team, Challenge: *Interplanetary Survival Guide: Martian Map*.
-- **Slide 2 (The Gap):** Regional Orbiters vs. Hyperlocal Spacewalks (Why Mars Trek isn't an EVA planner).
-- **Slide 3 (Data Architecture):** 9 NASA/USGS datasets fused on a 5m grid with transparent provenance tags (`REAL`, `DERIVED`, `MODEL`).
-- **Slide 4 (The Hero Feature):** Safe Return Envelope (Dijkstra Isochrone + 1.5× Consumables Rule).
-- **Slide 5 (Suit-Aware A* & SEXTANT):** Slope cutoff, RF line-of-sight, rover vs. foot mobility.
-- **Slide 6 (Ground-Truth & Validation):** Perseverance traverse benchmark + Live Mars 2020 raw image feed.
-- **Slide 7 (Field Usability):** Habitat Planning vs. Helmet HUD Visor mode + Cuff Cue Card.
-
+*(See archived 2-minute storyboard in repository git history if needed).*

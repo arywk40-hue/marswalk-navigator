@@ -69,3 +69,4 @@ def test_auxiliary_endpoints():
     res_targets = client.get("/api/targets")
     assert res_targets.status_code == 200
     assert res_targets.json()["type"] == "FeatureCollection"
+
